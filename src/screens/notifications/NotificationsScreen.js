@@ -1,177 +1,160 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, FlatList, StyleSheet, TouchableOpacity, Text, Image } from 'react-native';
-import { Appbar, ActivityIndicator, Divider, Badge } from 'react-native-paper';
-import { db } from '../../firebase';
-import { 
-  collection, 
-  query, 
-  where, 
-  orderBy, 
-  limit, 
-  getDocs, 
-  doc,
-  updateDoc,
-  Timestamp 
-} from 'firebase/firestore';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  RefreshControl,
+  Image
+} from 'react-native';
+import {
+  Appbar,
+  Text,
+  ActivityIndicator,
+  Avatar,
+  Divider
+} from 'react-native-paper';
+import { useDispatch, useSelector } from 'react-redux';
 import { AuthContext } from '../../contexts/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
+import { fetchNotifications, markNotificationAsRead } from '../../redux/slices/userSlice';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { formatDistanceToNow } from 'date-fns';
-import { theme } from '../../theme';
 
-const NotificationItem = ({ notification, onPress }) => {
-  let icon = 'heart';
-  let color = theme.colors.error;
-  let message = '';
-  
-  switch(notification.type) {
+const getNotificationIcon = (type) => {
+  switch (type) {
     case 'like':
-      icon = 'heart';
-      color = theme.colors.error;
-      message = `liked your post`;
-      break;
+      return { name: 'heart', color: '#FF4136' };
     case 'comment':
-      icon = 'chatbubble';
-      color = theme.colors.primary;
-      message = `commented: ${notification.commentText}`;
-      break;
+      return { name: 'comment-text', color: '#0074D9' };
     case 'follow':
-      icon = 'person-add';
-      color = theme.colors.success;
-      message = `started following you`;
-      break;
+      return { name: 'account-plus', color: '#2ECC40' };
+    case 'tag':
+      return { name: 'tag', color: '#FF851B' };
+    case 'mention':
+      return { name: 'at', color: '#B10DC9' };
     default:
-      icon = 'notifications';
-      color = theme.colors.primary;
-      message = 'sent you a notification';
+      return { name: 'bell', color: '#AAAAAA' };
   }
+};
+
+const NotificationItem = ({ notification, onPress, onUserPress }) => {
+  const icon = getNotificationIcon(notification.type);
   
   return (
-    <TouchableOpacity style={styles.notificationItem} onPress={() => onPress(notification)}>
-      <View style={styles.avatarContainer}>
-        <Image 
-          source={{ uri: notification.fromUserProfileImageUrl || 'https://via.placeholder.com/40' }} 
-          style={styles.avatar} 
+    <TouchableOpacity
+      style={[
+        styles.notificationItem,
+        notification.unread ? styles.unreadNotification : null
+      ]}
+      onPress={() => onPress(notification)}
+    >
+      <View style={styles.notificationIconContainer}>
+        <MaterialCommunityIcons
+          name={icon.name}
+          size={24}
+          color={icon.color}
+          style={styles.notificationTypeIcon}
         />
-        <View style={[styles.iconBadge, { backgroundColor: color }]}>
-          <Ionicons name={icon} size={12} color="#FFFFFF" />
-        </View>
       </View>
       
-      <View style={styles.contentContainer}>
-        <View style={styles.textContainer}>
-          <Text style={styles.username}>{notification.fromUsername}</Text>
-          <Text style={styles.message}>{message}</Text>
+      <TouchableOpacity
+        style={styles.userAvatarContainer}
+        onPress={() => onUserPress(notification.fromUser)}
+      >
+        <Avatar.Image
+          source={{ uri: notification.fromUser.profileImageUrl || 'https://via.placeholder.com/40' }}
+          size={40}
+        />
+      </TouchableOpacity>
+      
+      <View style={styles.notificationContent}>
+        <View style={styles.notificationHeader}>
+          <TouchableOpacity onPress={() => onUserPress(notification.fromUser)}>
+            <Text style={styles.username}>{notification.fromUser.displayName}</Text>
+          </TouchableOpacity>
+          <Text style={styles.timestamp}>
+            {formatDistanceToNow(new Date(notification.timestamp), { addSuffix: true })}
+          </Text>
         </View>
         
-        <View style={styles.rightContainer}>
-          <Text style={styles.time}>
-            {formatTime(notification.createdAt)}
-          </Text>
-          
-          {notification.type === 'like' || notification.type === 'comment' ? (
-            <Image 
-              source={{ uri: notification.postImageUrl || 'https://via.placeholder.com/40' }} 
-              style={styles.postThumbnail} 
-            />
-          ) : null}
-        </View>
+        <Text style={styles.notificationText}>{notification.text}</Text>
       </View>
       
-      {!notification.read && (
-        <View style={styles.unreadIndicator} />
+      {notification.postImage && (
+        <TouchableOpacity
+          style={styles.postImageContainer}
+          onPress={() => onPress(notification)}
+        >
+          <Image
+            source={{ uri: notification.postImage }}
+            style={styles.postImage}
+          />
+        </TouchableOpacity>
       )}
     </TouchableOpacity>
   );
 };
 
-const formatTime = (timestamp) => {
-  if (!timestamp) return '';
-  
-  try {
-    // If it's a Firestore timestamp, convert to Date
-    if (timestamp instanceof Timestamp) {
-      return formatDistanceToNow(timestamp.toDate(), { addSuffix: true });
-    }
-    
-    // If it's already a string ISO date
-    return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
-  } catch (error) {
-    return '';
-  }
-};
-
 const NotificationsScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
   const { user } = useContext(AuthContext);
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { notifications, loading } = useSelector((state) => state.user);
+  
+  const [refreshing, setRefreshing] = useState(false);
   
   useEffect(() => {
-    const fetchNotifications = async () => {
-      if (!user) return;
-      
-      try {
-        setLoading(true);
-        
-        const notificationsRef = collection(db, 'notifications');
-        const q = query(
-          notificationsRef,
-          where('userId', '==', user.uid),
-          orderBy('createdAt', 'desc'),
-          limit(50)
-        );
-        
-        const querySnapshot = await getDocs(q);
-        
-        const notificationsData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        setNotifications(notificationsData);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-        setError('Failed to load notifications');
-        setLoading(false);
-      }
-    };
-    
-    fetchNotifications();
-  }, [user]);
+    if (user) {
+      dispatch(fetchNotifications());
+    }
+  }, [dispatch, user]);
   
-  const handleNotificationPress = async (notification) => {
-    // Mark as read if not already
-    if (!notification.read) {
-      try {
-        const notificationRef = doc(db, 'notifications', notification.id);
-        await updateDoc(notificationRef, { read: true });
-        
-        // Update local state
-        setNotifications(prevNotifications => 
-          prevNotifications.map(n => 
-            n.id === notification.id ? { ...n, read: true } : n
-          )
-        );
-      } catch (error) {
-        console.error('Error marking notification as read:', error);
-      }
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await dispatch(fetchNotifications());
+    setRefreshing(false);
+  };
+  
+  const handleNotificationPress = (notification) => {
+    // Mark notification as read if it's unread
+    if (notification.unread) {
+      dispatch(markNotificationAsRead(notification.id));
     }
     
     // Navigate based on notification type
-    switch(notification.type) {
+    switch (notification.type) {
       case 'like':
       case 'comment':
+      case 'tag':
         navigation.navigate('PostDetail', { postId: notification.postId });
         break;
       case 'follow':
-        navigation.navigate('Profile', { userId: notification.fromUserId });
+        navigation.navigate('OtherUserProfile', { userId: notification.fromUser.id });
+        break;
+      case 'mention':
+        navigation.navigate('PostDetail', { postId: notification.postId });
         break;
       default:
-        // Default navigation if type is unknown
         break;
     }
   };
+  
+  const handleUserPress = (user) => {
+    if (user.id === user.uid) {
+      navigation.navigate('Profile');
+    } else {
+      navigation.navigate('OtherUserProfile', { userId: user.id });
+    }
+  };
+  
+  const renderEmptyList = () => (
+    <View style={styles.emptyContainer}>
+      <MaterialCommunityIcons name="bell-off" size={60} color="#AAAAAA" />
+      <Text style={styles.emptyText}>No notifications yet</Text>
+      <Text style={styles.emptySubText}>
+        When someone likes or comments on your posts, you'll see it here
+      </Text>
+    </View>
+  );
   
   return (
     <View style={styles.container}>
@@ -179,31 +162,33 @@ const NotificationsScreen = ({ navigation }) => {
         <Appbar.Content title="Notifications" />
       </Appbar.Header>
       
-      {loading ? (
+      {loading && !refreshing && notifications.length === 0 ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      ) : error ? (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      ) : notifications.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="notifications-off-outline" size={64} color="#CCCCCC" />
-          <Text style={styles.emptyText}>No notifications yet</Text>
+          <ActivityIndicator size="large" color="#0066CC" />
         </View>
       ) : (
         <FlatList
           data={notifications}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <NotificationItem 
-              notification={item} 
+            <NotificationItem
+              notification={item}
               onPress={handleNotificationPress}
+              onUserPress={handleUserPress}
             />
           )}
           ItemSeparatorComponent={() => <Divider />}
-          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={renderEmptyList}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={['#0066CC']}
+            />
+          }
+          contentContainerStyle={
+            notifications.length === 0 ? styles.emptyList : null
+          }
         />
       )}
     </View>
@@ -213,105 +198,82 @@ const NotificationsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: '#FFFFFF',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  notificationItem: {
+    flexDirection: 'row',
+    padding: 16,
     alignItems: 'center',
-    padding: 20,
   },
-  errorText: {
-    color: theme.colors.error,
-    textAlign: 'center',
+  unreadNotification: {
+    backgroundColor: '#F0F9FF',
+  },
+  notificationIconContainer: {
+    width: 24,
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  notificationTypeIcon: {
+    
+  },
+  userAvatarContainer: {
+    marginRight: 12,
+  },
+  notificationContent: {
+    flex: 1,
+  },
+  notificationHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  username: {
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  timestamp: {
+    fontSize: 12,
+    color: '#999',
+  },
+  notificationText: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  postImageContainer: {
+    marginLeft: 8,
+  },
+  postImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 4,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 40,
   },
   emptyText: {
+    fontSize: 18,
+    fontWeight: 'bold',
     marginTop: 16,
-    fontSize: 16,
+    marginBottom: 8,
+    color: '#666',
+  },
+  emptySubText: {
+    fontSize: 14,
     color: '#999',
     textAlign: 'center',
+    lineHeight: 20,
   },
-  notificationItem: {
-    flexDirection: 'row',
-    padding: 16,
-    alignItems: 'center',
-    backgroundColor: theme.colors.background,
-    position: 'relative',
-  },
-  avatarContainer: {
-    position: 'relative',
-    marginRight: 12,
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: theme.colors.surface,
-  },
-  iconBadge: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: theme.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: theme.colors.background,
-  },
-  contentContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  textContainer: {
-    flex: 1,
-    marginRight: 8,
-  },
-  username: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  message: {
-    fontSize: 14,
-    color: '#666',
-    flexWrap: 'wrap',
-  },
-  rightContainer: {
-    alignItems: 'flex-end',
-  },
-  time: {
-    fontSize: 12,
-    color: '#999',
-    marginBottom: 4,
-  },
-  postThumbnail: {
-    width: 40,
-    height: 40,
-    borderRadius: 4,
-  },
-  unreadIndicator: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 3,
-    backgroundColor: theme.colors.primary,
+  emptyList: {
+    flexGrow: 1,
   },
 });
 

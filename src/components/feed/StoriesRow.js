@@ -1,241 +1,246 @@
-import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Avatar } from 'react-native-paper';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect, useContext } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  Image 
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { db as firestore } from '../../firebase';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import { AuthContext } from '../../contexts/AuthContext';
 import { theme } from '../../theme';
+import { db } from '../../firebase';
+import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 
-const StoryCircle = ({ user, onPress, hasNewStory }) => {
-  return (
-    <TouchableOpacity style={styles.storyContainer} onPress={onPress}>
-      <View style={styles.storyCircleWrapper}>
-        {hasNewStory ? (
-          <LinearGradient
-            colors={[theme.colors.primary, theme.colors.skyBlue, theme.colors.deepBlue]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.gradientBorder}
-            cacheEnabled={true}
-          >
-            <View style={styles.storyCircleInner}>
-              <Avatar.Image 
-                source={{ uri: user.profileImageUrl || 'https://via.placeholder.com/70' }} 
-                size={56} 
-                style={styles.storyAvatar}
-              />
-            </View>
-          </LinearGradient>
-        ) : (
-          <View style={[styles.storyCircle, styles.inactiveStoryBorder]}>
-            <Avatar.Image 
-              source={{ uri: user.profileImageUrl || 'https://via.placeholder.com/70' }} 
-              size={56} 
-              style={styles.storyAvatar}
-            />
-          </View>
-        )}
-      </View>
-      <Text style={styles.storyUsername} numberOfLines={1} ellipsizeMode="tail">
-        {user.username}
-      </Text>
-    </TouchableOpacity>
-  );
-};
+// Demo stories data (will be replaced with actual data from Firestore)
+const DEMO_STORIES = [
+  {
+    id: 'user-story',
+    isCurrentUser: true,
+    hasNewStory: false,
+    username: 'You',
+    profileImageUrl: null,
+    viewed: false,
+  },
+  {
+    id: '1',
+    userId: 'user1',
+    username: 'alpine_skier',
+    profileImageUrl: 'https://images.unsplash.com/photo-1600486913747-55e5470d6f40?w=200&auto=format&fit=crop',
+    timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+    viewed: false,
+  },
+  {
+    id: '2',
+    userId: 'user2',
+    username: 'powder_hound',
+    profileImageUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=200&auto=format&fit=crop',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    viewed: false,
+  },
+  {
+    id: '3',
+    userId: 'user3',
+    username: 'ski_bum',
+    profileImageUrl: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=200&auto=format&fit=crop',
+    timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+    viewed: true,
+  },
+  {
+    id: '4',
+    userId: 'user4',
+    username: 'snow_rider',
+    profileImageUrl: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=200&auto=format&fit=crop',
+    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+    viewed: false,
+  },
+  {
+    id: '5',
+    userId: 'user5',
+    username: 'peak_explorer',
+    profileImageUrl: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=200&auto=format&fit=crop',
+    timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+    viewed: true,
+  },
+];
 
-const SnowReport = ({ resort, onPress }) => {
+/**
+ * Story item component - individual story circle
+ */
+const StoryItem = ({ story, onPress, currentUser }) => {
+  // If it's the current user's story item and they don't have a profile image
+  const displayImage = story.isCurrentUser && !story.profileImageUrl && currentUser?.profileImageUrl
+    ? { uri: currentUser.profileImageUrl }
+    : { uri: story.profileImageUrl || 'https://via.placeholder.com/100' };
+
   return (
-    <TouchableOpacity style={styles.snowReportContainer} onPress={onPress}>
-      <View style={styles.storyCircleWrapper}>
+    <TouchableOpacity style={styles.storyItem} onPress={() => onPress(story)}>
+      {!story.viewed ? (
         <LinearGradient
-          colors={[theme.colors.glacier, theme.colors.skyBlue, theme.colors.deepBlue]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.gradientBorder}
-          cacheEnabled={true}
+          colors={['#0066CC', '#00CCFF']}
+          style={styles.storyRing}
         >
-          <View style={styles.storyCircleInner}>
-            <Image 
-              source={{ uri: resort.imageUrl }} 
-              style={styles.snowReportImage} 
+          <View style={styles.storyImageContainer}>
+            <Image
+              source={displayImage}
+              style={styles.storyImage}
             />
           </View>
         </LinearGradient>
-        <View style={styles.snowBadge}>
-          <Text style={styles.snowText}>{resort.newSnow}"</Text>
+      ) : (
+        <View style={styles.storyRingViewed}>
+          <View style={styles.storyImageContainer}>
+            <Image
+              source={displayImage}
+              style={styles.storyImage}
+            />
+          </View>
         </View>
-      </View>
-      <Text style={styles.resortName} numberOfLines={1} ellipsizeMode="tail">
-        {resort.name}
+      )}
+
+      {story.isCurrentUser && (
+        <View style={styles.addStoryBadge}>
+          <Ionicons name="add-circle" size={18} color={theme.colors.primary} />
+        </View>
+      )}
+
+      <Text style={styles.storyUsername} numberOfLines={1}>
+        {story.isCurrentUser ? 'Your story' : story.username}
       </Text>
     </TouchableOpacity>
   );
 };
 
+/**
+ * StoriesRow component - horizontal scrolling row of user stories
+ */
 const StoriesRow = () => {
-  const { userData } = useSelector((state) => state.user);
-  const [following, setFollowing] = useState([]);
-  const [resorts, setResorts] = useState([]);
-  
+  const navigation = useNavigation();
+  const { user, userData } = useContext(AuthContext);
+  const [stories, setStories] = useState(DEMO_STORIES);
+
+  // In a real app, we would fetch actual stories from Firestore
   useEffect(() => {
-    if (userData?.uid) {
-      // Fetch mock following users for demo purposes
-      const fetchMockData = async () => {
-        // Mock following users
-        const mockFollowing = [
-          {
-            id: '1',
-            username: 'skiPro1',
-            profileImageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=60',
-            hasNewStory: true
-          },
-          {
-            id: '2',
-            username: 'powderGirl',
-            profileImageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=60',
-            hasNewStory: true
-          },
-          {
-            id: '3',
-            username: 'alpineRider',
-            profileImageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=60',
-            hasNewStory: false
-          },
-          {
-            id: '4',
-            username: 'mountainHigh',
-            profileImageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=60',
-            hasNewStory: true
-          }
-        ];
+    const fetchStories = async () => {
+      if (!user) return;
+
+      try {
+        // Here we would normally fetch real stories from users the current user follows
+        // For now, we'll just update the demo data with the current user's info
         
-        setFollowing(mockFollowing);
-        
-        // Mock resort data
-        const mockResorts = [
-          {
-            id: '1',
-            name: 'Whistler Blackcomb',
-            imageUrl: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=60',
-            newSnow: 5
-          },
-          {
-            id: '2',
-            name: 'Aspen Snowmass',
-            imageUrl: 'https://images.unsplash.com/photo-1605540436563-5bca919ae766?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=60',
-            newSnow: 3
-          },
-          {
-            id: '3',
-            name: 'Park City',
-            imageUrl: 'https://images.unsplash.com/photo-1453090927415-5f45085b65c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=60',
-            newSnow: 8
-          }
-        ];
-        
-        setResorts(mockResorts);
-      };
-      
-      fetchMockData();
+        if (userData) {
+          setStories(prevStories => {
+            // Find the current user's story item
+            const updatedStories = [...prevStories];
+            const currentUserStoryIndex = updatedStories.findIndex(s => s.isCurrentUser);
+            
+            if (currentUserStoryIndex !== -1) {
+              updatedStories[currentUserStoryIndex] = {
+                ...updatedStories[currentUserStoryIndex],
+                username: userData.username || 'You',
+                profileImageUrl: userData.profileImageUrl || null,
+              };
+            }
+            
+            return updatedStories;
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching stories:', error);
+      }
+    };
+
+    fetchStories();
+  }, [user, userData]);
+
+  const handleStoryPress = (story) => {
+    if (story.isCurrentUser) {
+      // Navigate to create story/post screen
+      navigation.navigate('NewPost');
+    } else {
+      // In a real app, this would navigate to a story viewer
+      // For now, navigate to the user's profile
+      navigation.navigate('Profile', { userId: story.userId });
     }
-  }, [userData]);
-  
-  // If there are no stories or snow reports to show, don't render anything
-  if (following.length === 0 && resorts.length === 0) {
-    return null;
-  }
+
+    // Mark as viewed in local state
+    setStories(prevStories => 
+      prevStories.map(s => 
+        s.id === story.id ? { ...s, viewed: true } : s
+      )
+    );
+  };
+
+  // If no user is logged in, don't show the stories row
+  if (!user) return null;
 
   return (
     <View style={styles.container}>
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Your Story */}
-        {userData && (
-          <StoryCircle 
-            user={{
-              username: 'Your Story',
-              profileImageUrl: userData.profileImageUrl
-            }}
-            onPress={() => {}}
-            hasNewStory={false}
-          />
-        )}
-        
-        {/* Following Stories */}
-        {following.map((user) => (
-          <StoryCircle 
-            key={user.id}
-            user={user}
-            onPress={() => {}}
-            hasNewStory={user.hasNewStory}
-          />
-        ))}
-        
-        {/* Resort Snow Reports */}
-        {resorts.map((resort) => (
-          <SnowReport 
-            key={resort.id}
-            resort={resort}
-            onPress={() => {}}
+        {stories.map(story => (
+          <StoryItem
+            key={story.id}
+            story={story}
+            onPress={handleStoryPress}
+            currentUser={userData}
           />
         ))}
       </ScrollView>
-      <View style={styles.divider} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 8,
-    backgroundColor: theme.colors.snow,
+    paddingVertical: 12,
+    borderBottomWidth: 0.5,
+    borderBottomColor: theme.colors.silver,
   },
   scrollContent: {
-    paddingHorizontal: 8,
-    paddingVertical: 12,
+    paddingHorizontal: 12,
   },
-  storyContainer: {
+  storyItem: {
     alignItems: 'center',
-    marginHorizontal: 8,
-    width: 72,
+    marginRight: 12,
+    width: 70,
   },
-  storyCircleWrapper: {
-    position: 'relative',
-  },
-  gradientBorder: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  storyCircleInner: {
+  storyRing: {
     width: 68,
     height: 68,
     borderRadius: 34,
-    backgroundColor: theme.colors.snow,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: theme.colors.snow,
-  },
-  storyCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
     padding: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  storyAvatar: {
-    backgroundColor: theme.colors.snow,
-  },
-  inactiveStoryBorder: {
-    borderWidth: 2,
+  storyRingViewed: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    padding: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
     borderColor: theme.colors.silver,
+  },
+  storyImageContainer: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: theme.colors.background,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: theme.colors.background,
+  },
+  storyImage: {
+    width: '100%',
+    height: '100%',
   },
   storyUsername: {
     fontSize: 11,
@@ -243,42 +248,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: theme.colors.midnight,
   },
-  snowReportContainer: {
-    alignItems: 'center',
-    marginHorizontal: 8,
-    width: 72,
-  },
-  snowReportImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-  },
-  snowBadge: {
+  addStoryBadge: {
     position: 'absolute',
-    bottom: 0,
+    bottom: 20,
     right: 0,
-    backgroundColor: theme.colors.deepBlue,
+    backgroundColor: theme.colors.background,
     borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderWidth: 2,
-    borderColor: theme.colors.snow,
-  },
-  snowText: {
-    color: theme.colors.snow,
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  resortName: {
-    fontSize: 11,
-    marginTop: 4,
-    textAlign: 'center',
-    color: theme.colors.midnight,
-  },
-  divider: {
-    height: 0.5,
-    backgroundColor: theme.colors.silver,
-    marginTop: 8,
+    padding: 2,
   },
 });
 

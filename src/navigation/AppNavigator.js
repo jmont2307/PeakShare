@@ -19,6 +19,11 @@ import NotificationsScreen from '../screens/notifications/NotificationsScreen';
 import PostDetailScreen from '../screens/post/PostDetailScreen';
 import ResortDetailScreen from '../screens/explore/ResortDetailScreen';
 import SimpleExploreScreen from '../screens/explore/SimpleExploreScreen';
+import EditProfileScreen from '../screens/profile/EditProfileScreen';
+import FollowersScreen from '../screens/profile/FollowersScreen';
+import FollowingScreen from '../screens/profile/FollowingScreen';
+import SettingsScreen from '../screens/profile/SettingsScreen';
+import ChangePasswordScreen from '../screens/auth/ChangePasswordScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -85,6 +90,11 @@ export default function AppNavigator() {
           <Stack.Screen name="PostDetail" component={PostDetailScreen} />
           <Stack.Screen name="ResortDetail" component={ResortDetailScreen} />
           <Stack.Screen name="SimpleExplore" component={SimpleExploreScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          <Stack.Screen name="Followers" component={FollowersScreen} />
+          <Stack.Screen name="Following" component={FollowingScreen} />
+          <Stack.Screen name="Settings" component={SettingsScreen} />
+          <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
         </>
       ) : (
         <>
