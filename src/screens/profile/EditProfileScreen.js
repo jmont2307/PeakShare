@@ -26,7 +26,8 @@ import {
   getStorage, 
   ref, 
   uploadBytesResumable, 
-  getDownloadURL 
+  getDownloadURL,
+  deleteObject
 } from 'firebase/storage';
 
 const EditProfileScreen = ({ navigation }) => {
@@ -124,6 +125,21 @@ const EditProfileScreen = ({ navigation }) => {
     }
   };
 
+  // Function to delete profile image from storage
+  const deleteProfileImage = async () => {
+    try {
+      const storage = getStorage();
+      const storageRef = ref(storage, `profile_images/${user.uid}`);
+      await deleteObject(storageRef);
+      console.log('Profile image deleted from storage');
+    } catch (error) {
+      // If file doesn't exist, that's okay - just continue
+      if (error.code !== 'storage/object-not-found') {
+        console.error('Error deleting profile image:', error);
+      }
+    }
+  };
+
   const handleSave = async () => {
     if (!displayName.trim()) {
       Alert.alert('Error', 'Display name is required');
@@ -138,8 +154,15 @@ const EditProfileScreen = ({ navigation }) => {
     try {
       let imageUrl = profileImageUrl;
       
+      // If there's a new profile image, upload it
       if (profileImage) {
         imageUrl = await uploadImage();
+      }
+      // If profileImageUrl is empty and there's no new image, it means the user removed their photo
+      else if (!profileImageUrl && userData?.profileImageUrl) {
+        // User had a profile picture before but removed it
+        imageUrl = '';
+        await deleteProfileImage();
       }
       
       const updatedProfile = {
@@ -202,6 +225,34 @@ const EditProfileScreen = ({ navigation }) => {
             </View>
           </TouchableOpacity>
           
+          {(profileImage || profileImageUrl) && (
+            <TouchableOpacity 
+              style={styles.removePhotoButton}
+              onPress={() => {
+                Alert.alert(
+                  'Remove Profile Picture',
+                  'Are you sure you want to remove your profile picture?',
+                  [
+                    {
+                      text: 'Cancel',
+                      style: 'cancel'
+                    },
+                    {
+                      text: 'Remove',
+                      style: 'destructive',
+                      onPress: () => {
+                        setProfileImage(null);
+                        setProfileImageUrl('');
+                      }
+                    }
+                  ]
+                );
+              }}
+            >
+              <Text style={styles.removePhotoText}>Remove Photo</Text>
+            </TouchableOpacity>
+          )}
+          
           {uploadingImage && (
             <ActivityIndicator size="small" color="#0066CC" style={styles.uploadingIndicator} />
           )}
@@ -237,13 +288,47 @@ const EditProfileScreen = ({ navigation }) => {
             numberOfLines={3}
           />
           
-          <TextInput
-            label="Location"
-            value={location}
-            onChangeText={setLocation}
-            style={styles.input}
-            mode="outlined"
-          />
+          <View style={styles.locationInputContainer}>
+            <TextInput
+              label="Location"
+              value={location}
+              onChangeText={setLocation}
+              style={styles.input}
+              mode="outlined"
+              right={
+                <TextInput.Icon 
+                  icon="map-marker" 
+                  onPress={async () => {
+                    try {
+                      setUploadingImage(true); // Reuse loading indicator
+                      const locationService = require('../../services/locationService');
+                      const locationResult = await locationService.getCurrentLocation();
+                      
+                      if (locationResult.success) {
+                        const details = await locationService.getLocationDetails(
+                          locationResult.coords.latitude,
+                          locationResult.coords.longitude
+                        );
+                        
+                        if (details.success) {
+                          setLocation(details.city && details.state 
+                            ? `${details.city}, ${details.state}` 
+                            : details.formattedAddress);
+                        }
+                      } else {
+                        Alert.alert('Location Error', 'Unable to get your current location. Please check your location permissions.');
+                      }
+                    } catch (error) {
+                      console.error('Error getting location:', error);
+                      Alert.alert('Error', 'Failed to get location. Please try again or enter it manually.');
+                    } finally {
+                      setUploadingImage(false);
+                    }
+                  }}
+                />
+              }
+            />
+          </View>
           
           <Text style={styles.sectionTitle}>Skiing Preferences</Text>
           
@@ -317,11 +402,28 @@ const styles = StyleSheet.create({
   uploadingIndicator: {
     marginTop: 8,
   },
+  removePhotoButton: {
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#FF3B30',
+  },
+  removePhotoText: {
+    color: '#FF3B30',
+    fontWeight: '500',
+    textAlign: 'center',
+  },
   formContainer: {
     paddingHorizontal: 16,
   },
   input: {
     marginBottom: 16,
+  },
+  locationInputContainer: {
+    marginBottom: 16,
+    position: 'relative',
   },
   sectionTitle: {
     fontSize: 18,

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, StyleSheet, Image, TextInput, ScrollView, TouchableOpacity, Text, Alert, Platform } from 'react-native';
+import { View, StyleSheet, Image, TextInput, ScrollView, Text, Alert, Platform } from 'react-native';
 import { Appbar, Button, ProgressBar } from 'react-native-paper';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import Geolocation from 'react-native-geolocation-service';
+import * as ImagePicker from 'expo-image-picker';
 import { db, storage } from '../../firebase';
 import { 
   doc, 
@@ -13,8 +12,7 @@ import {
   serverTimestamp 
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import { PERMISSIONS, request, check, RESULTS } from 'react-native-permissions';
+import LocationPicker from '../../components/LocationPicker';
 import { AuthContext } from '../../contexts/AuthContext';
 import { fetchWeatherForLocation } from '../../services/weatherService';
 
@@ -39,102 +37,67 @@ const NewPostScreen = ({ navigation }) => {
     }
   }, [location]);
 
-  const checkLocationPermission = async () => {
-    const platform = Platform.OS;
-    const permission = platform === 'ios' 
-      ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE 
-      : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
-
-    const result = await check(permission);
+  const handleLocationSelected = (newLocation) => {
+    setLocation(newLocation);
     
-    if (result === RESULTS.GRANTED) {
-      return true;
+    if (newLocation && newLocation.coordinates) {
+      fetchWeatherForLocation(newLocation.coordinates.latitude, newLocation.coordinates.longitude)
+        .then(weatherData => {
+          setWeather(weatherData);
+        })
+        .catch(error => {
+          console.error('Error fetching weather:', error);
+        });
+    } else {
+      setWeather(null);
     }
-    
-    const requestResult = await request(permission);
-    return requestResult === RESULTS.GRANTED;
-  };
-
-  const getCurrentLocation = async () => {
-    const hasPermission = await checkLocationPermission();
-    
-    if (!hasPermission) {
-      Alert.alert('Permission denied', 'Please enable location permissions in settings');
-      return;
-    }
-    
-    Geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          // Get place info from coordinates using Google Places API
-          const response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=AIzaSyBPeakShareGoogleMapsKeyPlaceholder`
-          );
-          const data = await response.json();
-          
-          if (data.results && data.results.length > 0) {
-            const addressComponents = data.results[0].address_components;
-            let locationName = '';
-            
-            // Try to find the nearest ski resort or just use the locality
-            for (const component of addressComponents) {
-              if (component.types.includes('establishment') || component.types.includes('locality')) {
-                locationName = component.long_name;
-                break;
-              }
-            }
-            
-            setLocation({
-              name: locationName || 'Current Location',
-              coordinates: {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude
-              }
-            });
-          }
-        } catch (error) {
-          console.error('Error getting location name:', error);
-        }
-      },
-      (error) => {
-        console.error('Error getting current location:', error);
-        Alert.alert('Error', 'Unable to get current location');
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-    );
   };
 
   const takePhoto = async () => {
-    const options = {
-      mediaType: 'photo',
-      quality: 0.8,
-    };
-    
     try {
-      const result = await launchCamera(options);
+      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+      if (!permissionResult.granted) {
+        Alert.alert('Permission needed', 'Camera permission is required to take photos');
+        return;
+      }
       
-      if (result.assets && result.assets.length > 0) {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+      
+      if (!result.canceled && result.assets && result.assets.length > 0) {
         setImage(result.assets[0]);
       }
     } catch (error) {
       console.error('Error taking photo:', error);
+      Alert.alert('Error', 'Failed to take photo');
     }
   };
 
   const selectFromGallery = async () => {
-    const options = {
-      mediaType: 'photo',
-      quality: 0.8,
-    };
-    
     try {
-      const result = await launchImageLibrary(options);
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        Alert.alert('Permission needed', 'Media library permission is required to select photos');
+        return;
+      }
       
-      if (result.assets && result.assets.length > 0) {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+      
+      if (!result.canceled && result.assets && result.assets.length > 0) {
         setImage(result.assets[0]);
       }
     } catch (error) {
       console.error('Error selecting from gallery:', error);
+      Alert.alert('Error', 'Failed to select photo');
     }
   };
 
@@ -262,54 +225,12 @@ const NewPostScreen = ({ navigation }) => {
           />
           
           <View style={styles.locationContainer}>
-            <Text style={styles.sectionTitle}>Location</Text>
-            
-            {location ? (
-              <View style={styles.selectedLocation}>
-                <Text style={styles.locationName}>{location.name}</Text>
-                <TouchableOpacity onPress={() => setLocation(null)}>
-                  <Text style={styles.changeButton}>Change</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <View>
-                <Button 
-                  icon="map-marker" 
-                  mode="outlined" 
-                  onPress={getCurrentLocation}
-                  style={styles.locationButton}
-                >
-                  Use Current Location
-                </Button>
-                
-                <Text style={styles.orText}>- OR -</Text>
-                
-                <GooglePlacesAutocomplete
-                  placeholder="Search for a ski resort or location"
-                  fetchDetails={true}
-                  onPress={(data, details = null) => {
-                    setLocation({
-                      name: data.description,
-                      coordinates: {
-                        latitude: details.geometry.location.lat,
-                        longitude: details.geometry.location.lng
-                      },
-                      placeId: data.place_id
-                    });
-                  }}
-                  query={{
-                    key: 'AIzaSyBPeakShareGoogleMapsKeyPlaceholder',
-                    language: 'en',
-                    types: 'establishment'
-                  }}
-                  styles={{
-                    textInputContainer: styles.searchInputContainer,
-                    textInput: styles.searchInput,
-                    listView: styles.searchResultsList
-                  }}
-                />
-              </View>
-            )}
+            <LocationPicker 
+              onLocationSelected={handleLocationSelected}
+              initialLocation={location}
+              title="Location"
+              placeholder="Search for a ski resort or location"
+            />
           </View>
           
           {weather && (
@@ -390,47 +311,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 8,
-  },
-  selectedLocation: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#f2f2f2',
-    borderRadius: 8,
-  },
-  locationName: {
-    fontSize: 16,
-  },
-  changeButton: {
-    color: '#0066CC',
-    fontWeight: '500',
-  },
-  locationButton: {
-    marginBottom: 16,
-  },
-  orText: {
-    textAlign: 'center',
-    marginVertical: 8,
-    color: '#8e8e8e',
-  },
-  searchInputContainer: {
-    backgroundColor: 'transparent',
-    borderTopWidth: 0,
-    borderBottomWidth: 0,
-  },
-  searchInput: {
-    height: 46,
-    color: '#5d5d5d',
-    fontSize: 16,
-    backgroundColor: '#f2f2f2',
-    borderRadius: 8,
-  },
-  searchResultsList: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    elevation: 3,
   },
   weatherContainer: {
     marginTop: 24,
