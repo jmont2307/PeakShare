@@ -323,6 +323,13 @@ export default function SimpleApp() {
   const [showFollowingModal, setShowFollowingModal] = useState(false);
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(true);
   
+  // Profile editing state (moved from renderProfileTab)
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editFullName, setEditFullName] = useState('');
+  const [editBio, setEditBio] = useState('');
+  const [editProfileImage, setEditProfileImage] = useState(null);
+  const profileImageInputRef = useRef(null);
+  
   // Sample demo users (for first-time visitors)
   const SAMPLE_USERS = [
     {
@@ -1677,12 +1684,7 @@ export default function SimpleApp() {
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       : [];
       
-    // State for edit profile form
-    const [isEditingProfile, setIsEditingProfile] = useState(false);
-    const [editFullName, setEditFullName] = useState('');
-    const [editBio, setEditBio] = useState('');
-    const [editProfileImage, setEditProfileImage] = useState(null);
-    const profileImageInputRef = useRef(null);
+    // Using profile editing state from component level
     
     // Handle profile edit
     const handleEditProfile = () => {
