@@ -110,6 +110,132 @@ export default function SimpleApp() {
   const [showFollowingModal, setShowFollowingModal] = useState(false);
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(true);
   
+  // Sample demo users (for first-time visitors)
+  const SAMPLE_USERS = [
+    {
+      id: 'user1',
+      email: 'alex@example.com',
+      username: 'alexski',
+      fullName: 'Alex Patterson',
+      password: 'password123',
+      createdAt: '2023-11-10T14:30:00Z',
+      profileImageUrl: '',
+      bio: 'Skiing enthusiast from Colorado. Love hitting the powder!',
+      postCount: 3,
+      followerCount: 120,
+      followingCount: 85
+    },
+    {
+      id: 'user2',
+      email: 'emma@example.com',
+      username: 'emma_slopes',
+      fullName: 'Emma Johnson',
+      password: 'password123',
+      createdAt: '2023-10-15T11:20:00Z',
+      profileImageUrl: '',
+      bio: 'Snowboarding is my passion. Always chasing winter!',
+      postCount: 4,
+      followerCount: 210,
+      followingCount: 93
+    },
+    {
+      id: 'user3',
+      email: 'mike@example.com',
+      username: 'mountain_mike',
+      fullName: 'Mike Chen',
+      password: 'password123',
+      createdAt: '2023-12-05T09:45:00Z',
+      profileImageUrl: '',
+      bio: 'Backcountry skier and photographer',
+      postCount: 5,
+      followerCount: 320,
+      followingCount: 102
+    }
+  ];
+
+  // Sample demo posts (for first-time visitors)
+  const SAMPLE_POSTS = [
+    {
+      id: 'post1',
+      userId: 'user1',
+      content: 'Amazing day at Whistler Blackcomb! Fresh powder and blue skies - doesn\'t get better than this! ⛷️☀️ #PowderDay',
+      resortId: '1',
+      createdAt: '2024-01-15T10:30:00Z',
+      likes: 28,
+      comments: []
+    },
+    {
+      id: 'post2',
+      userId: 'user2',
+      content: 'Carved some perfect lines at Aspen today. The conditions were absolutely perfect for some serious speed runs! 🏂💨 #Snowboarding #SpeedRuns',
+      resortId: '2',
+      createdAt: '2024-01-18T15:45:00Z',
+      likes: 42,
+      comments: []
+    },
+    {
+      id: 'post3',
+      userId: 'user3',
+      content: 'Just conquered the back bowls at Vail! Challenging terrain but the views were worth every turn. Anyone else been there recently? #BackBowls #EpicViews',
+      resortId: '3',
+      createdAt: '2024-01-20T11:15:00Z',
+      likes: 37,
+      comments: []
+    },
+    {
+      id: 'post4',
+      userId: 'user1',
+      content: 'Nothing beats spring skiing at Park City! Soft snow and sunny weather made for the perfect day on the slopes. ☀️⛷️ #SpringSkiing',
+      resortId: '3',
+      createdAt: '2024-01-25T14:20:00Z',
+      likes: 19,
+      comments: []
+    },
+    {
+      id: 'post5',
+      userId: 'user2',
+      content: 'Just experienced the most incredible powder day at Niseko! The Japan powder lives up to the hype! 30cm of fresh snow overnight. 🏂❄️ #JapanPowder #PowderHeaven',
+      resortId: '5',
+      createdAt: '2024-01-28T08:10:00Z',
+      likes: 53,
+      comments: []
+    }
+  ];
+
+  // Sample demo follows (for first-time visitors)
+  const SAMPLE_FOLLOWS = [
+    {
+      id: 'follow1',
+      followerId: 'user1',
+      followingId: 'user2',
+      createdAt: '2023-12-10T08:30:00Z'
+    },
+    {
+      id: 'follow2',
+      followerId: 'user1',
+      followingId: 'user3',
+      createdAt: '2023-12-15T14:20:00Z'
+    },
+    {
+      id: 'follow3',
+      followerId: 'user2',
+      followingId: 'user1',
+      createdAt: '2023-12-12T11:45:00Z'
+    },
+    {
+      id: 'follow4',
+      followerId: 'user2',
+      followingId: 'user3',
+      createdAt: '2023-12-18T16:30:00Z'
+    },
+    {
+      id: 'follow5',
+      followerId: 'user3',
+      followingId: 'user1',
+      createdAt: '2023-12-20T09:15:00Z'
+    }
+  ];
+
   // Load data from local storage on mount
   useEffect(() => {
     if (localStorageAvailable) {
@@ -119,22 +245,31 @@ export default function SimpleApp() {
         setShowWelcomeScreen(false);
       }
       
-      // Load registered users
+      // Load registered users or initialize with samples if empty
       const storedUsers = localStorage.getItem('peakshare_users');
       if (storedUsers) {
         setUsers(JSON.parse(storedUsers));
+      } else {
+        setUsers(SAMPLE_USERS);
+        localStorage.setItem('peakshare_users', JSON.stringify(SAMPLE_USERS));
       }
       
-      // Load posts
+      // Load posts or initialize with samples if empty
       const storedPosts = localStorage.getItem('peakshare_posts');
       if (storedPosts) {
         setPosts(JSON.parse(storedPosts));
+      } else {
+        setPosts(SAMPLE_POSTS);
+        localStorage.setItem('peakshare_posts', JSON.stringify(SAMPLE_POSTS));
       }
       
-      // Load follows
+      // Load follows or initialize with samples if empty
       const storedFollows = localStorage.getItem('peakshare_follows');
       if (storedFollows) {
         setFollows(JSON.parse(storedFollows));
+      } else {
+        setFollows(SAMPLE_FOLLOWS);
+        localStorage.setItem('peakshare_follows', JSON.stringify(SAMPLE_FOLLOWS));
       }
       
       // Check for logged in user
@@ -386,11 +521,14 @@ export default function SimpleApp() {
     </View>
   );
   
+  // State for feed tab
+  const [newPostContent, setNewPostContent] = useState('');
+  const [selectedResortForPost, setSelectedResortForPost] = useState(null);
+  const [showResortSelector, setShowResortSelector] = useState(false);
+  const [feedActiveTab, setFeedActiveTab] = useState('following'); // following or global
+  
   // Render feed tab with real posts
   const renderFeedTab = () => {
-    const [newPostContent, setNewPostContent] = useState('');
-    const [selectedResortForPost, setSelectedResortForPost] = useState(null);
-    const [showResortSelector, setShowResortSelector] = useState(false);
     
     const handleCreatePost = () => {
       if (!newPostContent.trim()) return;
@@ -404,8 +542,8 @@ export default function SimpleApp() {
       setSelectedResortForPost(null);
     };
     
-    // Get user's posts and posts from users they follow
-    const feedPosts = isLoggedIn 
+    // Get user's posts and posts from users they follow (for Following tab)
+    const followingPosts = isLoggedIn 
       ? posts
           .filter(post => {
             // Include user's own posts
@@ -419,6 +557,67 @@ export default function SimpleApp() {
           })
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       : [];
+      
+    // Get all posts (for Global tab)  
+    const globalPosts = posts
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+    // Determine which posts to display based on active tab
+    const displayPosts = feedActiveTab === 'following' ? followingPosts : globalPosts;
+    
+    // Format post content with hashtag highlighting
+    const formatPostContent = (content) => {
+      if (!content) return null;
+      
+      // Split by hashtags and create an array of text and hashtags
+      const parts = content.split(/(#\w+)/g);
+      
+      return parts.map((part, index) => {
+        if (part.startsWith('#')) {
+          return (
+            <Text key={index} style={styles.postHashtag}>
+              {part}
+            </Text>
+          );
+        }
+        return <Text key={index}>{part}</Text>;
+      });
+    };
+    
+    // Toggle like on a post
+    const toggleLike = (postId) => {
+      if (!isLoggedIn) {
+        setAuthMode('login');
+        return;
+      }
+      
+      // Find the post
+      const updatedPosts = posts.map(post => {
+        if (post.id === postId) {
+          // Check if user already liked the post
+          const hasLiked = post.likedBy?.includes(currentUser.id);
+          
+          if (hasLiked) {
+            // Unlike
+            return {
+              ...post,
+              likes: Math.max(0, post.likes - 1),
+              likedBy: post.likedBy.filter(id => id !== currentUser.id)
+            };
+          } else {
+            // Like
+            return {
+              ...post,
+              likes: post.likes + 1,
+              likedBy: [...(post.likedBy || []), currentUser.id]
+            };
+          }
+        }
+        return post;
+      });
+      
+      setPosts(updatedPosts);
+    };
     
     const renderPostItem = (post) => {
       const postUser = users.find(user => user.id === post.userId);
@@ -426,9 +625,38 @@ export default function SimpleApp() {
         ? SAMPLE_RESORTS.find(resort => resort.id === post.resortId)
         : null;
       
+      // Check if current user has liked this post
+      const isLiked = isLoggedIn && post.likedBy?.includes(currentUser.id);
+      
+      // Format date
+      const postDate = new Date(post.createdAt);
+      const now = new Date();
+      const diffMs = now - postDate;
+      const diffMins = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      
+      let timeAgo;
+      if (diffMins < 60) {
+        timeAgo = `${diffMins}m ago`;
+      } else if (diffHours < 24) {
+        timeAgo = `${diffHours}h ago`;
+      } else if (diffDays < 30) {
+        timeAgo = `${diffDays}d ago`;
+      } else {
+        timeAgo = postDate.toLocaleDateString();
+      }
+      
       return (
         <View style={styles.postCard} key={post.id}>
-          <View style={styles.postHeader}>
+          <TouchableOpacity 
+            style={styles.postHeader}
+            onPress={() => {
+              if (postUser && postUser.id !== currentUser?.id) {
+                alert(`View ${postUser.fullName}'s profile (not implemented)`);
+              }
+            }}
+          >
             <View style={styles.postHeaderLeft}>
               <View style={styles.userAvatarSmall}>
                 <Text style={styles.userInitialsSmall}>
@@ -438,7 +666,7 @@ export default function SimpleApp() {
               <View>
                 <Text style={styles.postUserName}>{postUser?.fullName || 'Unknown User'}</Text>
                 <Text style={styles.postTime}>
-                  {new Date(post.createdAt).toLocaleDateString()}
+                  {timeAgo}
                 </Text>
               </View>
             </View>
@@ -451,13 +679,23 @@ export default function SimpleApp() {
                 <Text style={styles.postResortTagText}>{postResort.name}</Text>
               </TouchableOpacity>
             )}
+          </TouchableOpacity>
+          
+          <View style={styles.postContent}>
+            {formatPostContent(post.content)}
           </View>
           
-          <Text style={styles.postContent}>{post.content}</Text>
-          
           <View style={styles.postActions}>
-            <TouchableOpacity style={styles.postAction}>
-              <Text style={styles.postActionText}>♥ {post.likes}</Text>
+            <TouchableOpacity 
+              style={styles.postAction}
+              onPress={() => toggleLike(post.id)}
+            >
+              <Text style={[
+                styles.postActionText,
+                isLiked && styles.postActionTextActive
+              ]}>
+                {isLiked ? '❤️' : '♡'} {post.likes}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.postAction}>
               <Text style={styles.postActionText}>💬 {post.comments?.length || 0}</Text>
@@ -472,50 +710,91 @@ export default function SimpleApp() {
         {isLoggedIn ? (
           <>
             <View style={styles.newPostContainer}>
+              <View style={styles.newPostHeader}>
+                <View style={styles.userAvatarSmall}>
+                  <Text style={styles.userInitialsSmall}>
+                    {currentUser?.username?.charAt(0).toUpperCase() || 'U'}
+                  </Text>
+                </View>
+                <Text style={styles.newPostPrompt}>What's on your mind, {currentUser?.fullName?.split(' ')[0] || 'skier'}?</Text>
+              </View>
+              
               <TextInput
                 style={styles.newPostInput}
-                placeholder="Share your skiing experience..."
+                placeholder="Share your skiing experience... (Try using #hashtags!)"
                 value={newPostContent}
                 onChangeText={setNewPostContent}
                 multiline
+                numberOfLines={3}
               />
               
-              {selectedResortForPost ? (
-                <View style={styles.selectedResortTag}>
-                  <Text style={styles.selectedResortText}>{selectedResortForPost.name}</Text>
-                  <TouchableOpacity onPress={() => setSelectedResortForPost(null)}>
-                    <Text style={styles.removeResortText}>×</Text>
-                  </TouchableOpacity>
+              <View style={styles.newPostFooter}>
+                <View style={styles.newPostOptions}>
+                  {selectedResortForPost ? (
+                    <View style={styles.selectedResortTag}>
+                      <Text style={styles.selectedResortText}>{selectedResortForPost.name}</Text>
+                      <TouchableOpacity onPress={() => setSelectedResortForPost(null)}>
+                        <Text style={styles.removeResortText}>×</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <TouchableOpacity 
+                      style={styles.tagResortButton}
+                      onPress={() => setShowResortSelector(true)}
+                    >
+                      <Text style={styles.tagResortButtonText}>⛰️ Tag Resort</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
-              ) : (
+                
                 <TouchableOpacity 
-                  style={styles.tagResortButton}
-                  onPress={() => setShowResortSelector(true)}
+                  style={[
+                    styles.postButton, 
+                    !newPostContent.trim() && styles.postButtonDisabled
+                  ]}
+                  onPress={handleCreatePost}
+                  disabled={!newPostContent.trim()}
                 >
-                  <Text style={styles.tagResortButtonText}>+ Tag a resort</Text>
+                  <Text style={styles.postButtonText}>Share Post</Text>
                 </TouchableOpacity>
-              )}
+              </View>
+            </View>
+            
+            {/* Feed Tabs */}
+            <View style={styles.feedTabs}>
+              <TouchableOpacity 
+                style={[styles.feedTab, feedActiveTab === 'following' && styles.activeFeedTab]}
+                onPress={() => setFeedActiveTab('following')}
+              >
+                <Text style={[styles.feedTabText, feedActiveTab === 'following' && styles.activeFeedTabText]}>
+                  Following
+                </Text>
+              </TouchableOpacity>
               
               <TouchableOpacity 
-                style={[
-                  styles.postButton, 
-                  !newPostContent.trim() && styles.postButtonDisabled
-                ]}
-                onPress={handleCreatePost}
-                disabled={!newPostContent.trim()}
+                style={[styles.feedTab, feedActiveTab === 'global' && styles.activeFeedTab]}
+                onPress={() => setFeedActiveTab('global')}
               >
-                <Text style={styles.postButtonText}>Post</Text>
+                <Text style={[styles.feedTabText, feedActiveTab === 'global' && styles.activeFeedTabText]}>
+                  Global
+                </Text>
               </TouchableOpacity>
             </View>
             
             <ScrollView style={styles.feedScroll}>
-              {feedPosts.length > 0 ? (
-                feedPosts.map(post => renderPostItem(post))
+              {displayPosts.length > 0 ? (
+                displayPosts.map(post => renderPostItem(post))
               ) : (
                 <View style={styles.emptyFeed}>
-                  <Text style={styles.emptyFeedTitle}>No Posts Yet</Text>
+                  <Text style={styles.emptyFeedTitle}>
+                    {feedActiveTab === 'following' 
+                      ? 'No Posts in Your Feed Yet'
+                      : 'No Posts Yet'}
+                  </Text>
                   <Text style={styles.emptyFeedText}>
-                    Create your first post or follow other users to see their posts in your feed.
+                    {feedActiveTab === 'following'
+                      ? 'Create your first post or follow other users to see their posts in your feed.'
+                      : 'Be the first to share your skiing adventure!'}
                   </Text>
                 </View>
               )}
@@ -1851,59 +2130,117 @@ const styles = StyleSheet.create({
   },
   
   // Feed and Post styles
+  feedTabs: {
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    padding: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  feedTab: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 12,
+  },
+  activeFeedTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#0077cc',
+  },
+  feedTabText: {
+    fontSize: 15,
+    color: '#777',
+  },
+  activeFeedTabText: {
+    color: '#0077cc',
+    fontWeight: 'bold',
+  },
   newPostContainer: {
     padding: 15,
     backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
+    marginBottom: 8,
+  },
+  newPostHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  newPostPrompt: {
+    marginLeft: 10,
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
   },
   newPostInput: {
     backgroundColor: '#f5f5f5',
-    padding: 12,
+    padding: 15,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e0e0e0',
-    minHeight: 80,
+    minHeight: 100,
     textAlignVertical: 'top',
-    marginBottom: 10,
+    marginBottom: 12,
+    fontSize: 16,
+  },
+  newPostFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  newPostOptions: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   selectedResortTag: {
     flexDirection: 'row',
     backgroundColor: '#e6f7ff',
-    alignSelf: 'flex-start',
-    padding: 6,
-    borderRadius: 15,
-    marginBottom: 10,
+    padding: 8,
+    borderRadius: 20,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
   },
   selectedResortText: {
     color: '#0077cc',
-    fontSize: 13,
-    marginRight: 5,
+    fontSize: 14,
+    marginRight: 8,
+    fontWeight: '500',
   },
   removeResortText: {
     color: '#0077cc',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   tagResortButton: {
-    alignSelf: 'flex-start',
-    marginBottom: 10,
+    backgroundColor: '#f0f7ff',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#d0e1f9',
   },
   tagResortButtonText: {
     color: '#0077cc',
     fontSize: 14,
+    fontWeight: '500',
   },
   postButton: {
     backgroundColor: '#0077cc',
-    padding: 10,
-    borderRadius: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
     alignItems: 'center',
-    alignSelf: 'flex-end',
-    minWidth: 80,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   postButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#bbb',
   },
   postButtonText: {
     color: 'white',
@@ -1915,16 +2252,22 @@ const styles = StyleSheet.create({
   },
   postCard: {
     backgroundColor: 'white',
-    padding: 15,
-    marginBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    marginBottom: 8,
+    borderRadius: 8,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   postHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
   postHeaderLeft: {
     flexDirection: 'row',
@@ -1950,23 +2293,35 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   postContent: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     fontSize: 15,
     color: '#333',
     lineHeight: 22,
-    marginBottom: 15,
+    marginBottom: 5,
+  },
+  postHashtag: {
+    color: '#0077cc',
+    fontWeight: '500',
   },
   postActions: {
     flexDirection: 'row',
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
-    paddingTop: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
   },
   postAction: {
     marginRight: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   postActionText: {
     color: '#888',
     fontSize: 14,
+  },
+  postActionTextActive: {
+    color: '#e74c3c',
   },
   feedSignInButton: {
     backgroundColor: '#0077cc',

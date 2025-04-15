@@ -50,7 +50,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.join(appDirectory, 'web/index.html'),
+      template: path.join(appDirectory, 'public/index.html'),
     }),
     new webpack.DefinePlugin({
       __DEV__: JSON.stringify(true),
