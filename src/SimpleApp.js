@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, TextInput, Alert, ImageBackground } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, TextInput, Alert, ImageBackground, ActivityIndicator } from 'react-native';
 import LinearGradient from 'react-native-web-linear-gradient';
 
 // For web localStorage implementation
@@ -160,27 +160,72 @@ export default function SimpleApp() {
       userId: 'user1',
       content: 'Amazing day at Whistler Blackcomb! Fresh powder and blue skies - doesn\'t get better than this! ⛷️☀️ #PowderDay',
       resortId: '1',
+      imageUrl: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       createdAt: '2024-01-15T10:30:00Z',
       likes: 28,
-      comments: []
+      comments: [
+        {
+          id: 'comment1',
+          userId: 'user2',
+          content: 'Looks incredible! How many inches of fresh powder did you get?',
+          createdAt: '2024-01-15T11:45:00Z'
+        },
+        {
+          id: 'comment2',
+          userId: 'user3',
+          content: 'Jealous! I need to plan a trip to Whistler soon.',
+          createdAt: '2024-01-15T14:20:00Z'
+        }
+      ],
+      likedBy: ['user2', 'user3']
     },
     {
       id: 'post2',
       userId: 'user2',
       content: 'Carved some perfect lines at Aspen today. The conditions were absolutely perfect for some serious speed runs! 🏂💨 #Snowboarding #SpeedRuns',
       resortId: '2',
+      imageUrl: 'https://images.unsplash.com/photo-1605540436563-5bca919ae766?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       createdAt: '2024-01-18T15:45:00Z',
       likes: 42,
-      comments: []
+      comments: [
+        {
+          id: 'comment3',
+          userId: 'user1',
+          content: 'Those runs at Aspen are legendary! Did you hit the terrain park too?',
+          createdAt: '2024-01-18T16:30:00Z'
+        }
+      ],
+      likedBy: ['user1', 'user3']
     },
     {
       id: 'post3',
       userId: 'user3',
       content: 'Just conquered the back bowls at Vail! Challenging terrain but the views were worth every turn. Anyone else been there recently? #BackBowls #EpicViews',
       resortId: '3',
+      imageUrl: 'https://images.unsplash.com/photo-1453090927415-5f45085b65c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       createdAt: '2024-01-20T11:15:00Z',
       likes: 37,
-      comments: []
+      comments: [
+        {
+          id: 'comment4',
+          userId: 'user2',
+          content: 'I was there last month! The back bowls are a real test of skill. What was your favorite run?',
+          createdAt: '2024-01-20T12:05:00Z'
+        },
+        {
+          id: 'comment5',
+          userId: 'user1',
+          content: 'Beautiful shot! The view alone is worth the trip.',
+          createdAt: '2024-01-20T13:45:00Z'
+        },
+        {
+          id: 'comment6',
+          userId: 'user3',
+          content: 'Thanks everyone! @user2 I really enjoyed Sun Down Bowl - definitely challenging but so rewarding!',
+          createdAt: '2024-01-20T15:30:00Z'
+        }
+      ],
+      likedBy: ['user1', 'user2']
     },
     {
       id: 'post4',
@@ -189,16 +234,19 @@ export default function SimpleApp() {
       resortId: '3',
       createdAt: '2024-01-25T14:20:00Z',
       likes: 19,
-      comments: []
+      comments: [],
+      likedBy: ['user2']
     },
     {
       id: 'post5',
       userId: 'user2',
       content: 'Just experienced the most incredible powder day at Niseko! The Japan powder lives up to the hype! 30cm of fresh snow overnight. 🏂❄️ #JapanPowder #PowderHeaven',
       resortId: '5',
+      imageUrl: 'https://images.unsplash.com/photo-1548133750-129e3168eb56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       createdAt: '2024-01-28T08:10:00Z',
       likes: 53,
-      comments: []
+      comments: [],
+      likedBy: ['user1', 'user3']
     }
   ];
 
@@ -307,6 +355,90 @@ export default function SimpleApp() {
     }
   }, [follows]);
   
+  // Add comment to a post
+  const addComment = (postId) => {
+    if (!isLoggedIn) {
+      setAuthMode('login');
+      return;
+    }
+    
+    if (!newComment.trim()) return;
+    
+    const comment = {
+      id: Date.now().toString(),
+      userId: currentUser.id,
+      content: newComment,
+      createdAt: new Date().toISOString()
+    };
+    
+    const updatedPosts = posts.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          comments: [...(post.comments || []), comment]
+        };
+      }
+      return post;
+    });
+    
+    setPosts(updatedPosts);
+    setNewComment('');
+  };
+  
+  // Delete comment from a post
+  const deleteComment = (postId, commentId) => {
+    if (!isLoggedIn) return;
+    
+    const updatedPosts = posts.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          comments: post.comments.filter(comment => comment.id !== commentId)
+        };
+      }
+      return post;
+    });
+    
+    setPosts(updatedPosts);
+  };
+  
+  // Delete a post
+  const deletePost = (postId) => {
+    if (!isLoggedIn) return;
+    
+    // Confirm deletion
+    if (!window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+      return;
+    }
+    
+    // Filter out the post to delete
+    const updatedPosts = posts.filter(post => post.id !== postId);
+    setPosts(updatedPosts);
+    
+    // Close comments view if it was open for the deleted post
+    if (showComments === postId) {
+      setShowComments(null);
+    }
+    
+    // If viewing profile modal and this was the last post, update stats
+    if (viewingProfile) {
+      const remainingUserPosts = updatedPosts.filter(post => post.userId === viewingProfile.id);
+      if (remainingUserPosts.length === 0) {
+        // Refresh the profile view
+        setViewingProfile({...viewingProfile});
+      }
+    }
+    
+    // If viewing full profile and this was the last post, update stats
+    if (viewingFullProfile) {
+      const remainingUserPosts = updatedPosts.filter(post => post.userId === viewingFullProfile.id);
+      if (remainingUserPosts.length === 0) {
+        // Refresh the full profile view
+        setViewingFullProfile({...viewingFullProfile});
+      }
+    }
+  };
+  
   // Helper function to get user stats
   const getUserStats = (userId) => {
     const userPosts = posts.filter(post => post.userId === userId);
@@ -361,7 +493,7 @@ export default function SimpleApp() {
   };
   
   // Create a new post
-  const createPost = (content, resortId) => {
+  const createPost = (content, resortId, imageUrl = null) => {
     if (!currentUser) {
       setAuthMode('login');
       return;
@@ -372,9 +504,11 @@ export default function SimpleApp() {
       userId: currentUser.id,
       content,
       resortId,
+      imageUrl, // Image URL from the file input
       createdAt: new Date().toISOString(),
       likes: 0,
-      comments: []
+      comments: [],
+      likedBy: []
     };
     
     setPosts([...posts, newPost]);
@@ -526,20 +660,78 @@ export default function SimpleApp() {
   const [selectedResortForPost, setSelectedResortForPost] = useState(null);
   const [showResortSelector, setShowResortSelector] = useState(false);
   const [feedActiveTab, setFeedActiveTab] = useState('following'); // following or global
+  const [showComments, setShowComments] = useState(null); // post ID for which comments are shown
+  const [newComment, setNewComment] = useState('');
+  const [viewingProfile, setViewingProfile] = useState(null); // User being viewed in profile modal
+  const [selectedImage, setSelectedImage] = useState(null); // Selected image for new post
+  const [isUploadingImage, setIsUploadingImage] = useState(false); // Flag for image upload
+  const fileInputRef = useRef(null); // Reference to the file input
+  const [viewingFullProfile, setViewingFullProfile] = useState(null); // User for full profile view
   
   // Render feed tab with real posts
+  // Format post content with hashtag highlighting
+  const formatPostContent = (content) => {
+    if (!content) return null;
+    
+    // Split by hashtags and create an array of text and hashtags
+    const parts = content.split(/(#\w+)/g);
+    
+    return parts.map((part, index) => {
+      if (part.startsWith('#')) {
+        return (
+          <Text key={index} style={styles.postHashtag}>
+            {part}
+          </Text>
+        );
+      }
+      return <Text key={index}>{part}</Text>;
+    });
+  };
+  
   const renderFeedTab = () => {
     
+    // Handle file selection
+    const handleImageSelect = (event) => {
+      if (event.target.files && event.target.files[0]) {
+        const file = event.target.files[0];
+        const imageUrl = URL.createObjectURL(file);
+        setSelectedImage({
+          file,
+          url: imageUrl
+        });
+      }
+    };
+    
+    // Handle image upload button click
+    const handleImageButtonClick = () => {
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
+    };
+    
+    // Remove selected image
+    const handleRemoveImage = () => {
+      setSelectedImage(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    };
+    
     const handleCreatePost = () => {
-      if (!newPostContent.trim()) return;
+      if (!newPostContent.trim() && !selectedImage) return;
       
       createPost(
         newPostContent, 
-        selectedResortForPost ? selectedResortForPost.id : null
+        selectedResortForPost ? selectedResortForPost.id : null,
+        selectedImage ? selectedImage.url : null
       );
       
       setNewPostContent('');
       setSelectedResortForPost(null);
+      setSelectedImage(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     };
     
     // Get user's posts and posts from users they follow (for Following tab)
@@ -564,25 +756,6 @@ export default function SimpleApp() {
       
     // Determine which posts to display based on active tab
     const displayPosts = feedActiveTab === 'following' ? followingPosts : globalPosts;
-    
-    // Format post content with hashtag highlighting
-    const formatPostContent = (content) => {
-      if (!content) return null;
-      
-      // Split by hashtags and create an array of text and hashtags
-      const parts = content.split(/(#\w+)/g);
-      
-      return parts.map((part, index) => {
-        if (part.startsWith('#')) {
-          return (
-            <Text key={index} style={styles.postHashtag}>
-              {part}
-            </Text>
-          );
-        }
-        return <Text key={index}>{part}</Text>;
-      });
-    };
     
     // Toggle like on a post
     const toggleLike = (postId) => {
@@ -652,8 +825,8 @@ export default function SimpleApp() {
           <TouchableOpacity 
             style={styles.postHeader}
             onPress={() => {
-              if (postUser && postUser.id !== currentUser?.id) {
-                alert(`View ${postUser.fullName}'s profile (not implemented)`);
+              if (postUser) {
+                setViewingProfile(postUser);
               }
             }}
           >
@@ -681,9 +854,30 @@ export default function SimpleApp() {
             )}
           </TouchableOpacity>
           
+          {/* Add post menu/options for current user's posts */}
+          {isLoggedIn && postUser?.id === currentUser.id && (
+            <TouchableOpacity 
+              style={styles.postOptionsButton}
+              onPress={() => deletePost(post.id)}
+            >
+              <Text style={styles.postOptionsButtonText}>🗑️</Text>
+            </TouchableOpacity>
+          )}
+          
           <View style={styles.postContent}>
             {formatPostContent(post.content)}
           </View>
+          
+          {/* Post image (if available) */}
+          {post.imageUrl && (
+            <View style={styles.postImageContainer}>
+              <Image 
+                source={{ uri: post.imageUrl }} 
+                style={styles.postImage}
+                resizeMode="cover"
+              />
+            </View>
+          )}
           
           <View style={styles.postActions}>
             <TouchableOpacity 
@@ -697,10 +891,91 @@ export default function SimpleApp() {
                 {isLiked ? '❤️' : '♡'} {post.likes}
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.postAction}>
-              <Text style={styles.postActionText}>💬 {post.comments?.length || 0}</Text>
+            <TouchableOpacity 
+              style={styles.postAction}
+              onPress={() => setShowComments(post.id === showComments ? null : post.id)}
+            >
+              <Text style={[
+                styles.postActionText, 
+                showComments === post.id && styles.postActionTextActive
+              ]}>
+                💬 {post.comments?.length || 0}
+              </Text>
             </TouchableOpacity>
           </View>
+          
+          {/* Comments Section - only show for the selected post */}
+          {showComments === post.id && (
+            <View style={styles.commentsSection}>
+              <View style={styles.commentsList}>
+                {post.comments && post.comments.length > 0 ? (
+                  post.comments.map(comment => {
+                    const commentUser = users.find(u => u.id === comment.userId);
+                    return (
+                      <View key={comment.id} style={styles.commentItem}>
+                        <View style={styles.commentHeader}>
+                          <TouchableOpacity
+                            style={styles.commentUser}
+                            onPress={() => commentUser && setViewingProfile(commentUser)}
+                          >
+                            <View style={styles.commentUserAvatar}>
+                              <Text style={styles.commentUserInitials}>
+                                {commentUser?.username.charAt(0).toUpperCase() || '?'}
+                              </Text>
+                            </View>
+                            <View>
+                              <Text style={styles.commentUserName}>
+                                {commentUser?.fullName || 'Unknown User'}
+                              </Text>
+                              <Text style={styles.commentTime}>
+                                {new Date(comment.createdAt).toLocaleDateString()}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                          
+                          {/* Delete button for own comments */}
+                          {isLoggedIn && commentUser?.id === currentUser.id && (
+                            <TouchableOpacity
+                              style={styles.deleteCommentButton}
+                              onPress={() => deleteComment(post.id, comment.id)}
+                            >
+                              <Text style={styles.deleteCommentText}>×</Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                        
+                        <Text style={styles.commentContent}>{comment.content}</Text>
+                      </View>
+                    );
+                  })
+                ) : (
+                  <Text style={styles.noCommentsText}>No comments yet. Be the first to comment!</Text>
+                )}
+              </View>
+              
+              {/* Add comment form */}
+              {isLoggedIn && (
+                <View style={styles.addCommentForm}>
+                  <TextInput
+                    style={styles.commentInput}
+                    placeholder="Add a comment..."
+                    value={newComment}
+                    onChangeText={setNewComment}
+                  />
+                  <TouchableOpacity
+                    style={[
+                      styles.addCommentButton,
+                      !newComment.trim() && styles.addCommentButtonDisabled
+                    ]}
+                    disabled={!newComment.trim()}
+                    onPress={() => addComment(post.id)}
+                  >
+                    <Text style={styles.addCommentButtonText}>Post</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          )}
         </View>
       );
     };
@@ -728,6 +1003,23 @@ export default function SimpleApp() {
                 numberOfLines={3}
               />
               
+              {/* Image preview */}
+              {selectedImage && (
+                <View style={styles.imagePreviewContainer}>
+                  <Image 
+                    source={{ uri: selectedImage.url }} 
+                    style={styles.imagePreview} 
+                    resizeMode="cover"
+                  />
+                  <TouchableOpacity 
+                    style={styles.removeImageButton}
+                    onPress={handleRemoveImage}
+                  >
+                    <Text style={styles.removeImageButtonText}>×</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
               <View style={styles.newPostFooter}>
                 <View style={styles.newPostOptions}>
                   {selectedResortForPost ? (
@@ -745,15 +1037,34 @@ export default function SimpleApp() {
                       <Text style={styles.tagResortButtonText}>⛰️ Tag Resort</Text>
                     </TouchableOpacity>
                   )}
+                  
+                  {/* Hidden file input */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                  />
+                  
+                  {/* Image upload button */}
+                  {!selectedImage && (
+                    <TouchableOpacity 
+                      style={styles.addImageButton}
+                      onPress={handleImageButtonClick}
+                    >
+                      <Text style={styles.addImageButtonText}>📷 Add Photo</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
                 
                 <TouchableOpacity 
                   style={[
                     styles.postButton, 
-                    !newPostContent.trim() && styles.postButtonDisabled
+                    (!newPostContent.trim() && !selectedImage) && styles.postButtonDisabled
                   ]}
                   onPress={handleCreatePost}
-                  disabled={!newPostContent.trim()}
+                  disabled={!newPostContent.trim() && !selectedImage}
                 >
                   <Text style={styles.postButtonText}>Share Post</Text>
                 </TouchableOpacity>
@@ -1307,6 +1618,174 @@ export default function SimpleApp() {
     </View>
   );
   
+  // Function to render the full profile page
+  const renderFullProfilePage = () => {
+    if (!viewingFullProfile) return null;
+    
+    // Get user stats
+    const stats = getUserStats(viewingFullProfile.id);
+    
+    // Check if the current user is following this user
+    const isFollowingUser = isLoggedIn ? 
+      isFollowing(viewingFullProfile.id) : false;
+    
+    // Get user's posts
+    const userPosts = posts
+      .filter(post => post.userId === viewingFullProfile.id)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+    // Get following and followers
+    const userFollowers = follows
+      .filter(follow => follow.followingId === viewingFullProfile.id)
+      .map(follow => users.find(user => user.id === follow.followerId))
+      .filter(Boolean);
+      
+    const userFollowing = follows
+      .filter(follow => follow.followerId === viewingFullProfile.id)
+      .map(follow => users.find(user => user.id === follow.followingId))
+      .filter(Boolean);
+    
+    return (
+      <View style={styles.container}>
+        {/* Mountain Background */}
+        <MountainBackground />
+        
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => setViewingFullProfile(null)}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{viewingFullProfile.fullName}'s Profile</Text>
+          <View style={{width: 40}} /> {/* Empty view for spacing */}
+        </View>
+        
+        <ScrollView style={styles.fullProfileContent}>
+          {/* Profile Header with Avatar and Bio */}
+          <View style={styles.fullProfileHeader}>
+            <View style={styles.fullProfileAvatar}>
+              <Text style={styles.fullProfileAvatarText}>
+                {viewingFullProfile.username.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+            
+            <View style={styles.fullProfileInfo}>
+              <Text style={styles.fullProfileName}>{viewingFullProfile.fullName}</Text>
+              <Text style={styles.fullProfileUsername}>@{viewingFullProfile.username}</Text>
+              {viewingFullProfile.bio && (
+                <Text style={styles.fullProfileBio}>{viewingFullProfile.bio}</Text>
+              )}
+              
+              {isLoggedIn && viewingFullProfile.id !== currentUser?.id && (
+                <TouchableOpacity
+                  style={[
+                    styles.followFullProfileButton,
+                    isFollowingUser && styles.unfollowButton
+                  ]}
+                  onPress={() => toggleFollow(viewingFullProfile.id)}
+                >
+                  <Text style={[
+                    styles.followFullProfileButtonText,
+                    isFollowingUser && styles.unfollowButtonText
+                  ]}>
+                    {isFollowingUser ? 'Following' : 'Follow'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+          
+          {/* Stats Row */}
+          <View style={styles.fullProfileStatsRow}>
+            <View style={styles.fullProfileStat}>
+              <Text style={styles.fullProfileStatValue}>{stats.postCount}</Text>
+              <Text style={styles.fullProfileStatLabel}>Posts</Text>
+            </View>
+            <TouchableOpacity style={styles.fullProfileStat}>
+              <Text style={styles.fullProfileStatValue}>{stats.followerCount}</Text>
+              <Text style={styles.fullProfileStatLabel}>Followers</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.fullProfileStat}>
+              <Text style={styles.fullProfileStatValue}>{stats.followingCount}</Text>
+              <Text style={styles.fullProfileStatLabel}>Following</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Posts Section */}
+          <View style={styles.fullProfilePosts}>
+            <Text style={styles.fullProfileSectionTitle}>Posts</Text>
+            {userPosts.length > 0 ? (
+              userPosts.map(post => {
+                const postResort = post.resortId 
+                  ? SAMPLE_RESORTS.find(resort => resort.id === post.resortId)
+                  : null;
+                  
+                return (
+                  <View key={post.id} style={styles.fullProfilePostCard}>
+                    <View style={styles.fullProfilePostHeader}>
+                      <Text style={styles.fullProfilePostTime}>
+                        {new Date(post.createdAt).toLocaleDateString()}
+                      </Text>
+                      <View style={styles.fullProfilePostHeaderRight}>
+                        {postResort && (
+                          <TouchableOpacity
+                            onPress={() => {
+                              setViewingFullProfile(null);
+                              setSelectedResort(postResort);
+                            }}
+                          >
+                            <Text style={styles.fullProfilePostResort}>{postResort.name}</Text>
+                          </TouchableOpacity>
+                        )}
+                        
+                        {/* Delete option for user's own posts */}
+                        {isLoggedIn && viewingFullProfile.id === currentUser?.id && (
+                          <TouchableOpacity
+                            style={styles.fullProfileDeleteButton}
+                            onPress={() => deletePost(post.id)}
+                          >
+                            <Text style={styles.fullProfileDeleteButtonText}>🗑️</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </View>
+                    
+                    <View style={styles.fullProfilePostContent}>
+                      {formatPostContent(post.content)}
+                    </View>
+                    
+                    {post.imageUrl && (
+                      <View style={styles.fullProfilePostImageContainer}>
+                        <Image 
+                          source={{ uri: post.imageUrl }} 
+                          style={styles.fullProfilePostImage}
+                          resizeMode="cover"
+                        />
+                      </View>
+                    )}
+                    
+                    <View style={styles.fullProfilePostStats}>
+                      <Text style={styles.fullProfilePostStat}>
+                        ❤️ {post.likes}
+                      </Text>
+                      <Text style={styles.fullProfilePostStat}>
+                        💬 {post.comments?.length || 0}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })
+            ) : (
+              <Text style={styles.noPostsText}>No posts yet</Text>
+            )}
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
+  
   // Welcome Screen Component
   const renderWelcomeScreen = () => {
     const handleContinueAsGuest = () => {
@@ -1382,6 +1861,163 @@ export default function SimpleApp() {
     return renderResortDetail();
   }
   
+  // If viewing a full profile, show the full profile page
+  if (viewingFullProfile) {
+    return renderFullProfilePage();
+  }
+  
+  // Render profile view modal
+  const renderProfileModal = () => {
+    if (!viewingProfile) return null;
+    
+    // Get user stats
+    const stats = getUserStats(viewingProfile.id);
+    
+    // Check if the current user is following this user
+    const isFollowingUser = isLoggedIn ? 
+      isFollowing(viewingProfile.id) : false;
+    
+    // Get user's posts
+    const userPosts = posts
+      .filter(post => post.userId === viewingProfile.id)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    return (
+      <View style={styles.modalOverlay}>
+        <View style={styles.profileModal}>
+          <View style={styles.profileModalHeader}>
+            <View style={styles.profileHeaderContent}>
+              <Text style={styles.profileModalTitle}>{viewingProfile.fullName}'s Profile</Text>
+              <TouchableOpacity 
+                style={styles.closeProfileButton}
+                onPress={() => setViewingProfile(null)}
+              >
+                <Text style={styles.closeProfileText}>×</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          
+          <ScrollView style={styles.profileModalContent}>
+            <View style={styles.profileSection}>
+              <View style={styles.profileInfo}>
+                <View style={styles.profileModalAvatar}>
+                  <Text style={styles.profileModalAvatarText}>
+                    {viewingProfile.username.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+                
+                <View style={styles.profileModalDetails}>
+                  <Text style={styles.profileModalName}>{viewingProfile.fullName}</Text>
+                  <Text style={styles.profileModalUsername}>@{viewingProfile.username}</Text>
+                  {viewingProfile.bio && (
+                    <Text style={styles.profileModalBio}>{viewingProfile.bio}</Text>
+                  )}
+                </View>
+              </View>
+              
+              <View style={styles.profileActionRow}>
+                {isLoggedIn && viewingProfile.id !== currentUser.id && (
+                  <TouchableOpacity
+                    style={[
+                      styles.followActionButton,
+                      isFollowingUser && styles.unfollowButton
+                    ]}
+                    onPress={() => toggleFollow(viewingProfile.id)}
+                  >
+                    <Text style={[
+                      styles.followActionButtonText,
+                      isFollowingUser && styles.unfollowButtonText
+                    ]}>
+                      {isFollowingUser ? 'Following' : 'Follow'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                
+                <TouchableOpacity
+                  style={styles.viewFullProfileButton}
+                  onPress={() => {
+                    setViewingFullProfile(viewingProfile);
+                    setViewingProfile(null);
+                  }}
+                >
+                  <Text style={styles.viewFullProfileButtonText}>View Full Profile</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            
+            <View style={styles.profileStatsRow}>
+              <View style={styles.profileStat}>
+                <Text style={styles.profileStatValue}>{stats.postCount}</Text>
+                <Text style={styles.profileStatLabel}>Posts</Text>
+              </View>
+              <View style={styles.profileStat}>
+                <Text style={styles.profileStatValue}>{stats.followerCount}</Text>
+                <Text style={styles.profileStatLabel}>Followers</Text>
+              </View>
+              <View style={styles.profileStat}>
+                <Text style={styles.profileStatValue}>{stats.followingCount}</Text>
+                <Text style={styles.profileStatLabel}>Following</Text>
+              </View>
+            </View>
+            
+            <View style={styles.userPostsSection}>
+              <Text style={styles.userPostsTitle}>Posts</Text>
+              {userPosts.length > 0 ? (
+                userPosts.map(post => {
+                  const postResort = post.resortId 
+                    ? SAMPLE_RESORTS.find(resort => resort.id === post.resortId)
+                    : null;
+                  
+                  // Check if current user has liked this post
+                  const isLiked = isLoggedIn && post.likedBy?.includes(currentUser.id);
+                  
+                  return (
+                    <View key={post.id} style={styles.userPostCard}>
+                      <View style={styles.userPostHeader}>
+                        <Text style={styles.userPostTime}>
+                          {new Date(post.createdAt).toLocaleDateString()}
+                        </Text>
+                        {postResort && (
+                          <Text style={styles.userPostResort}>{postResort.name}</Text>
+                        )}
+                      </View>
+                      
+                      <View style={styles.userPostContent}>
+                        {formatPostContent(post.content)}
+                      </View>
+                      
+                      {/* Post image in user profile (if available) */}
+                      {post.imageUrl && (
+                        <View style={styles.userPostImageContainer}>
+                          <Image 
+                            source={{ uri: post.imageUrl }} 
+                            style={styles.userPostImage}
+                            resizeMode="cover"
+                          />
+                        </View>
+                      )}
+                      
+                      <View style={styles.userPostStats}>
+                        <Text style={styles.userPostStat}>
+                          {isLiked ? '❤️' : '♡'} {post.likes}
+                        </Text>
+                        <Text style={styles.userPostStat}>
+                          💬 {post.comments?.length || 0}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })
+              ) : (
+                <Text style={styles.noPostsText}>No posts yet</Text>
+              )}
+            </View>
+          </ScrollView>
+        </View>
+      </View>
+    );
+  };
+  
   // Main application view with tabs
   return (
     <View style={styles.container}>
@@ -1447,6 +2083,7 @@ export default function SimpleApp() {
       {authMode && renderAuthModal()}
       {showFollowersModal && renderFollowersModal()}
       {showFollowingModal && renderFollowingModal()}
+      {viewingProfile && renderProfileModal()}
     </View>
   );
 }
@@ -1460,6 +2097,441 @@ const styles = StyleSheet.create({
     height: '100%',
     position: 'relative',
     zIndex: 0,
+  },
+  
+  // Profile Modal Styles
+  profileModal: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    width: '90%',
+    maxWidth: 500,
+    maxHeight: '90%',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  profileModalHeader: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    padding: 15,
+  },
+  profileHeaderContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  profileModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  closeProfileButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeProfileText: {
+    fontSize: 20,
+    color: '#555',
+    fontWeight: 'bold',
+    lineHeight: 24,
+  },
+  profileModalContent: {
+    flex: 1,
+  },
+  profileSection: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  profileInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  profileModalAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#0077cc',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 15,
+  },
+  profileModalAvatarText: {
+    fontSize: 24,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  profileModalDetails: {
+    flex: 1,
+  },
+  profileModalName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 3,
+  },
+  profileModalUsername: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 5,
+  },
+  profileModalBio: {
+    fontSize: 14,
+    color: '#444',
+  },
+  followActionButton: {
+    backgroundColor: '#0077cc',
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    alignSelf: 'flex-start',
+    marginTop: 10,
+  },
+  followActionButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  unfollowButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#0077cc',
+  },
+  unfollowButtonText: {
+    color: '#0077cc',
+  },
+  profileStatsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    paddingVertical: 15,
+  },
+  profileStat: {
+    alignItems: 'center',
+  },
+  profileStatValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  profileStatLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 3,
+  },
+  userPostsSection: {
+    padding: 15,
+  },
+  userPostsTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 15,
+  },
+  userPostCard: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  userPostHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  userPostTime: {
+    fontSize: 12,
+    color: '#666',
+  },
+  userPostResort: {
+    fontSize: 12,
+    color: '#0077cc',
+    fontWeight: 'bold',
+  },
+  userPostContent: {
+    marginBottom: 10,
+  },
+  userPostStats: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    paddingTop: 8,
+  },
+  userPostStat: {
+    fontSize: 14,
+    color: '#666',
+    marginRight: 15,
+  },
+  noPostsText: {
+    textAlign: 'center',
+    color: '#888',
+    fontStyle: 'italic',
+    padding: 20,
+  },
+  
+  // Image upload and display styles
+  imagePreviewContainer: {
+    marginTop: 10,
+    marginBottom: 10,
+    position: 'relative',
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  removeImageButtonText: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    lineHeight: 22,
+  },
+  addImageButton: {
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    marginLeft: 10,
+  },
+  addImageButtonText: {
+    color: '#555',
+    fontSize: 14,
+  },
+  postImageContainer: {
+    marginTop: 10,
+    marginBottom: 10,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  postImage: {
+    width: '100%',
+    height: 240,
+  },
+  userPostImageContainer: {
+    marginTop: 8,
+    marginBottom: 10,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  userPostImage: {
+    width: '100%',
+    height: 180,
+  },
+  
+  // Post delete buttons
+  postOptionsButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 30, 
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  postOptionsButtonText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  fullProfilePostHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fullProfileDeleteButton: {
+    marginLeft: 10,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fullProfileDeleteButtonText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  
+  // Profile action row
+  profileActionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+  },
+  viewFullProfileButton: {
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  viewFullProfileButtonText: {
+    color: '#444',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  
+  // Full profile page styles
+  fullProfileContent: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+  fullProfileHeader: {
+    flexDirection: 'row',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  fullProfileAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#0077cc',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 20,
+  },
+  fullProfileAvatarText: {
+    fontSize: 32,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  fullProfileInfo: {
+    flex: 1,
+  },
+  fullProfileName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  fullProfileUsername: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 8,
+  },
+  fullProfileBio: {
+    fontSize: 14,
+    color: '#444',
+    marginBottom: 15,
+    lineHeight: 20,
+  },
+  followFullProfileButton: {
+    backgroundColor: '#0077cc',
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    alignSelf: 'flex-start',
+    marginTop: 5,
+  },
+  followFullProfileButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  fullProfileStatsRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    paddingVertical: 15,
+  },
+  fullProfileStat: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  fullProfileStatValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  fullProfileStatLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  fullProfilePosts: {
+    padding: 20,
+  },
+  fullProfileSectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 15,
+  },
+  fullProfilePostCard: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    marginBottom: 20,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2.5,
+  },
+  fullProfilePostHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  fullProfilePostTime: {
+    fontSize: 14,
+    color: '#888',
+  },
+  fullProfilePostResort: {
+    fontSize: 14,
+    color: '#0077cc',
+    fontWeight: '500',
+  },
+  fullProfilePostContent: {
+    marginBottom: 12,
+  },
+  fullProfilePostImageContainer: {
+    marginVertical: 10,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  fullProfilePostImage: {
+    width: '100%',
+    height: 240,
+  },
+  fullProfilePostStats: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    paddingTop: 12,
+    marginTop: 5,
+  },
+  fullProfilePostStat: {
+    fontSize: 14,
+    color: '#666',
+    marginRight: 20,
   },
   header: {
     height: 60,
@@ -1616,10 +2688,12 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginRight: 10,
+    paddingHorizontal: 5,
   },
   backButtonText: {
     color: 'white',
     fontSize: 16,
+    fontWeight: '500',
   },
   detailTitle: {
     color: 'white',
@@ -2322,6 +3396,116 @@ const styles = StyleSheet.create({
   },
   postActionTextActive: {
     color: '#e74c3c',
+  },
+  
+  // Comments styles
+  commentsSection: {
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    backgroundColor: '#f9f9f9',
+  },
+  commentsList: {
+    padding: 10,
+  },
+  commentItem: {
+    backgroundColor: 'white',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 1,
+  },
+  commentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  commentUser: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  commentUserAvatar: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#0077cc',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  commentUserInitials: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  commentUserName: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#333',
+  },
+  commentTime: {
+    fontSize: 11,
+    color: '#999',
+  },
+  commentContent: {
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 20,
+  },
+  deleteCommentButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteCommentText: {
+    fontSize: 16,
+    color: '#999',
+    fontWeight: 'bold',
+  },
+  noCommentsText: {
+    color: '#999',
+    textAlign: 'center',
+    padding: 15,
+    fontStyle: 'italic',
+  },
+  addCommentForm: {
+    flexDirection: 'row',
+    padding: 10,
+    backgroundColor: 'white',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    alignItems: 'center',
+  },
+  commentInput: {
+    flex: 1,
+    height: 36,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 18,
+    paddingHorizontal: 15,
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  addCommentButton: {
+    marginLeft: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#0077cc',
+    borderRadius: 18,
+  },
+  addCommentButtonDisabled: {
+    backgroundColor: '#cccccc',
+  },
+  addCommentButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 13,
   },
   feedSignInButton: {
     backgroundColor: '#0077cc',
