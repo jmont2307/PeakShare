@@ -111,10 +111,18 @@ const ProfileScreen = ({ navigation }) => {
       
       <ScrollView>
         <View style={styles.profileHeader}>
-          <Image 
-            source={{ uri: displayUserData.profileImageUrl || 'https://via.placeholder.com/100' }} 
-            style={styles.profileImage} 
-          />
+          <TouchableOpacity
+            onPress={() => navigation.navigate('EditProfile')}
+            style={styles.profileImageContainer}
+          >
+            <Image 
+              source={{ uri: displayUserData.profileImageUrl || 'https://via.placeholder.com/100' }} 
+              style={styles.profileImage} 
+            />
+            <View style={styles.editImageOverlay}>
+              <MaterialCommunityIcons name="camera" size={18} color="#FFFFFF" />
+            </View>
+          </TouchableOpacity>
           
           <View style={styles.profileStats}>
             <ProfileStatItem 
@@ -268,10 +276,26 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
   },
+  profileImageContainer: {
+    position: 'relative',
+  },
   profileImage: {
     width: 90,
     height: 90,
     borderRadius: 45,
+  },
+  editImageOverlay: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#0066CC',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   profileStats: {
     flex: 1,

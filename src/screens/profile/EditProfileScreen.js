@@ -288,13 +288,47 @@ const EditProfileScreen = ({ navigation }) => {
             numberOfLines={3}
           />
           
-          <TextInput
-            label="Location"
-            value={location}
-            onChangeText={setLocation}
-            style={styles.input}
-            mode="outlined"
-          />
+          <View style={styles.locationInputContainer}>
+            <TextInput
+              label="Location"
+              value={location}
+              onChangeText={setLocation}
+              style={styles.input}
+              mode="outlined"
+              right={
+                <TextInput.Icon 
+                  icon="map-marker" 
+                  onPress={async () => {
+                    try {
+                      setUploadingImage(true); // Reuse loading indicator
+                      const locationService = require('../../services/locationService');
+                      const locationResult = await locationService.getCurrentLocation();
+                      
+                      if (locationResult.success) {
+                        const details = await locationService.getLocationDetails(
+                          locationResult.coords.latitude,
+                          locationResult.coords.longitude
+                        );
+                        
+                        if (details.success) {
+                          setLocation(details.city && details.state 
+                            ? `${details.city}, ${details.state}` 
+                            : details.formattedAddress);
+                        }
+                      } else {
+                        Alert.alert('Location Error', 'Unable to get your current location. Please check your location permissions.');
+                      }
+                    } catch (error) {
+                      console.error('Error getting location:', error);
+                      Alert.alert('Error', 'Failed to get location. Please try again or enter it manually.');
+                    } finally {
+                      setUploadingImage(false);
+                    }
+                  }}
+                />
+              }
+            />
+          </View>
           
           <Text style={styles.sectionTitle}>Skiing Preferences</Text>
           
@@ -386,6 +420,10 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 16,
+  },
+  locationInputContainer: {
+    marginBottom: 16,
+    position: 'relative',
   },
   sectionTitle: {
     fontSize: 18,
