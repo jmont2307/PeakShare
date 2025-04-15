@@ -8,11 +8,13 @@ import {
   TouchableOpacity,
   FlatList,
   TextInput,
-  ActivityIndicator
+  ActivityIndicator,
+  Alert
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import LinearGradient from 'react-native-web-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchResorts, searchResorts } from '../../redux/slices/resortsSlice';
+import { fetchResorts, searchResorts, seedResorts } from '../../redux/slices/resortsSlice';
+import { fetchWeatherForLocation } from '../../services/weatherService';
 import { theme } from '../../theme';
 
 // Fallback sample data in case Firebase isn't set up
@@ -66,12 +68,52 @@ const SAMPLE_RESORTS = [
 
 const SimpleExploreScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { resortsList, searchResults, loading, error } = useSelector(state => state.resorts);
+  const { resortsList, searchResults, loading, error, seedingStatus } = useSelector(state => state.resorts);
   const [searchQuery, setSearchQuery] = useState('');
+  const [weatherData, setWeatherData] = useState({});
+  const [loadingWeather, setLoadingWeather] = useState(false);
   
   useEffect(() => {
+    // Fetch resorts and seed the database if needed
     dispatch(fetchResorts());
+    dispatch(seedResorts());
   }, [dispatch]);
+  
+  // Fetch weather data for resorts
+  useEffect(() => {
+    const fetchWeatherForResorts = async () => {
+      if (resortsList.length > 0 && !loadingWeather) {
+        setLoadingWeather(true);
+        
+        // Get weather for up to 5 resorts to avoid rate limiting
+        const resortsToFetch = resortsList.slice(0, 5);
+        const weatherPromises = resortsToFetch.map(resort => 
+          fetchWeatherForLocation(
+            resort.latitude || 0, 
+            resort.longitude || 0,
+            resort.name
+          ).then(data => ({ resortId: resort.id, data }))
+        );
+        
+        try {
+          const results = await Promise.all(weatherPromises);
+          const weatherMap = {};
+          
+          results.forEach(({ resortId, data }) => {
+            weatherMap[resortId] = data;
+          });
+          
+          setWeatherData(weatherMap);
+        } catch (error) {
+          console.error('Error fetching weather data:', error);
+        } finally {
+          setLoadingWeather(false);
+        }
+      }
+    };
+    
+    fetchWeatherForResorts();
+  }, [resortsList]);
   
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -84,45 +126,72 @@ const SimpleExploreScreen = ({ navigation }) => {
   const handleSelectResort = (resort) => {
     navigation.navigate('ResortDetail', { resortId: resort.id });
   };
+  
+  const getWeatherForResort = (resortId) => {
+    return weatherData[resortId] || null;
+  };
 
-  const renderResortCard = ({ item }) => (
-    <TouchableOpacity 
-      style={styles.resortCard}
-      onPress={() => handleSelectResort(item)}
-    >
-      <Image 
-        source={{ uri: item.imageUrl || 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&q=80' }} 
-        style={styles.resortImage}
-      />
-      <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.8)']}
-        style={styles.gradient}
-      />
-      <View style={styles.resortInfo}>
-        <Text style={styles.resortName}>{item.name}</Text>
-        <Text style={styles.resortLocation}>{item.location || item.region || 'Unknown location'}</Text>
-        <View style={styles.resortStats}>
-          {item.rating && (
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{item.rating}</Text>
-              <Text style={styles.statLabel}>★ Rating</Text>
-            </View>
-          )}
-          {(item.newSnow || item.snowDepth) && (
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{item.newSnow || item.snowDepth || 0}"</Text>
-              <Text style={styles.statLabel}>Snow</Text>
-            </View>
-          )}
+  const renderResortCard = ({ item }) => {
+    const weather = getWeatherForResort(item.id);
+    
+    return (
+      <TouchableOpacity 
+        style={styles.resortCard}
+        onPress={() => handleSelectResort(item)}
+      >
+        <Image 
+          source={{ uri: item.imageUrl || 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&q=80' }} 
+          style={styles.resortImage}
+        />
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.8)']}
+          style={styles.gradient}
+        />
+        <View style={styles.resortInfo}>
+          <Text style={styles.resortName}>{item.name}</Text>
+          <Text style={styles.resortLocation}>{item.location || item.region || 'Unknown location'}</Text>
+          <View style={styles.resortStats}>
+            {item.rating && (
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{item.rating}</Text>
+                <Text style={styles.statLabel}>★ Rating</Text>
+              </View>
+            )}
+            {weather && (
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{weather.temperature}°C</Text>
+                <Text style={styles.statLabel}>{weather.conditions}</Text>
+              </View>
+            )}
+            {(weather?.snowDepth || item.newSnow || item.snowDepth) && (
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>
+                  {weather?.snowDepth || item.newSnow || item.snowDepth || 0}cm
+                </Text>
+                <Text style={styles.statLabel}>Snow</Text>
+              </View>
+            )}
+            {weather?.powderRating > 0 && (
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{weather.powderRating}/10</Text>
+                <Text style={styles.statLabel}>Powder</Text>
+              </View>
+            )}
+          </View>
         </View>
-      </View>
-      {(item.newSnow || item.snowDepth) && (
-        <View style={styles.snowBadge}>
-          <Text style={styles.snowText}>{item.newSnow || item.snowDepth || 0}"</Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
+        {(weather?.snowfall > 0) && (
+          <View style={[styles.snowBadge, styles.freshSnowBadge]}>
+            <Text style={styles.snowText}>+{weather.snowfall}cm</Text>
+          </View>
+        )}
+        {(weather?.snowDepth > 0 || item.newSnow || item.snowDepth) && (
+          <View style={styles.snowBadge}>
+            <Text style={styles.snowText}>{weather?.snowDepth || item.newSnow || item.snowDepth || 0}cm</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
   
   // Use resorts from Redux or fall back to sample data
   const resorts = resortsList.length > 0 ? resortsList : SAMPLE_RESORTS;
@@ -349,6 +418,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 4,
+  },
+  freshSnowBadge: {
+    top: 48,
+    backgroundColor: theme.colors.success,
   },
   snowText: {
     color: theme.colors.snow,

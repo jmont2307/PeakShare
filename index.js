@@ -1,5 +1,6 @@
+// Entry point for native platforms
 import { registerRootComponent } from 'expo';
 import App from './App';
 
-// Register the App component as the root component
+// Register with Expo
 registerRootComponent(App);

@@ -19,9 +19,12 @@ import {
   useColorScheme
 } from 'react-native';
 import { Provider as PaperProvider, DefaultTheme, DarkTheme } from 'react-native-paper';
-import { StatusBar } from 'expo-status-bar';
-import { LinearGradient } from 'expo-linear-gradient';
+// Using React Native's StatusBar instead of Expo's
+import { StatusBar } from 'react-native';
+import LinearGradient from 'react-native-web-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// No need to import here, it's imported in index.js
 import { theme as lightTheme } from './src/theme';
 
 // Create dark theme based on light theme
@@ -1809,69 +1812,32 @@ import SimpleExploreScreen from './src/screens/explore/SimpleExploreScreen';
 
 // Main App Container Component
 const AppContainer = () => {
-  const { user, isLoading, handleLogin, handleSignup } = useContext(AuthUserContext);
+  const { user, loading } = useContext(AuthUserContext);
   const { theme, isDarkMode, toggleTheme } = useContext(ThemeContext);
-  const [authScreen, setAuthScreen] = useState('login');
-  const [showingAuth, setShowingAuth] = useState(false);
   
-  if (isLoading) {
-    return (
-      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
-        <Text style={{ color: theme.colors.primary }}>Loading...</Text>
-      </View>
-    );
-  }
+  // Use the AppNavigator component that handles all navigation
+  return <AppNavigator />;
   
-  // If user wants to see auth screens
-  if (showingAuth) {
-    return authScreen === 'login' ? (
-      <LoginScreen 
-        onLogin={(email, password) => {
-          handleLogin(email, password);
-          setShowingAuth(false);
-        }}
-        onNavigateToSignup={() => setAuthScreen('signup')}
-        onCancel={() => setShowingAuth(false)}
-      />
-    ) : (
-      <SignupScreen 
-        onSignup={(email, fullName, username, password) => {
-          handleSignup(email, fullName, username, password);
-          setShowingAuth(false);
-        }}
-        onNavigateToLogin={() => setAuthScreen('login')}
-        onCancel={() => setShowingAuth(false)}
-      />
-    );
-  }
-  
-  // If logged in, show main app
-  if (user) {
-    return <InstagramApp user={user} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />;
-  }
-  
-  // By default, show the explore screen
-  return (
-    <SimpleExploreScreen 
-      onLogin={() => {
-        setAuthScreen('login');
-        setShowingAuth(true);
-      }}
-      onSignup={() => {
-        setAuthScreen('signup');
-        setShowingAuth(true);
-      }}
-    />
-  );
+  // The AppNavigator handles the authentication state internally based on the AuthContext
+  // It will show login/register screens when user is null
+  // It will show the main app screens when user is authenticated
 };
 
+// Import navigation components
+import { NavigationContainer } from '@react-navigation/native';
+import AppNavigator from './src/navigation/AppNavigator';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+// Minimal App component
 export default function App() {
   return (
     <PaperProvider>
       <ThemeProvider>
-        <AuthProvider>
-          <AppContainer />
-        </AuthProvider>
+        <NavigationContainer>
+          <AuthProvider>
+            <AppContainer />
+          </AuthProvider>
+        </NavigationContainer>
       </ThemeProvider>
     </PaperProvider>
   );

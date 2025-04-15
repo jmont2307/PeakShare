@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PeakShare</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-color: #ffffff;
+    }
+    
+    .app-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #0079bf;
+    }
+    
+    .auth-buttons {
+      display: flex;
+    }
+    
+    .login-button {
+      margin-right: 10px;
+      padding: 8px 16px;
+      border: none;
+      background: none;
+      color: #0079bf;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    .signup-button {
+      padding: 8px 16px;
+      background-color: #0079bf;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    .search-container {
+      margin: 20px 0;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      font-size: 16px;
+    }
+    
+    .banner {
+      position: relative;
+      height: 200px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    .banner-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .banner-gradient {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 150px;
+      background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8));
+    }
+    
+    .banner-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px;
+    }
+    
+    .banner-title {
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    
+    .banner-subtitle {
+      color: white;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+    
+    .banner-button {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: #0079bf;
+      color: white;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    
+    .resorts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      grid-gap: 20px;
+    }
+    
+    .resort-card {
+      position: relative;
+      height: 200px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .resort-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .resort-gradient {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 120px;
+      background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8));
+    }
+    
+    .resort-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px;
+    }
+    
+    .resort-name {
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    
+    .resort-location {
+      color: white;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    
+    .resort-stats {
+      display: flex;
+    }
+    
+    .stat-item {
+      margin-right: 16px;
+    }
+    
+    .stat-value {
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    
+    .stat-label {
+      color: white;
+      font-size: 12px;
+    }
+    
+    .snow-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background-color: #0079bf;
+      border-radius: 12px;
+      padding: 4px 8px;
+    }
+    
+    .snow-text {
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+    }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+    
+    .modal-content {
+      position: relative;
+      background-color: white;
+      margin: 10vh auto;
+      padding: 20px;
+      width: 90%;
+      max-width: 500px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .modal-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    
+    .form-submit {
+      width: 100%;
+      padding: 12px;
+      background-color: #0079bf;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    
+    .form-footer {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 14px;
+    }
+    
+    .form-link {
+      color: #0079bf;
+      cursor: pointer;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <div class="logo">PeakShare</div>
+      <div class="auth-buttons">
+        <button class="login-button" onclick="openModal('login-modal')">Log In</button>
+        <button class="signup-button" onclick="openModal('signup-modal')">Sign Up</button>
+      </div>
+    </header>
+    
+    <div class="search-container">
+      <input type="text" class="search-input" placeholder="Search resorts...">
+    </div>
+    
+    <div class="banner">
+      <img src="https://images.unsplash.com/photo-1531911970825-c1ce6fe5a25f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" class="banner-image">
+      <div class="banner-gradient"></div>
+      <div class="banner-content">
+        <h1 class="banner-title">Discover Your Perfect Ski Adventure</h1>
+        <p class="banner-subtitle">Join the community of ski enthusiasts</p>
+        <a href="#" class="banner-button" onclick="openModal('signup-modal')">Sign Up Now</a>
+      </div>
+    </div>
+    
+    <h2 class="section-title">Popular Resorts</h2>
+    
+    <div class="resorts-grid">
+      <div class="resort-card">
+        <img src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="resort-image">
+        <div class="resort-gradient"></div>
+        <div class="resort-info">
+          <h3 class="resort-name">Whistler Blackcomb</h3>
+          <p class="resort-location">British Columbia, Canada</p>
+          <div class="resort-stats">
+            <div class="stat-item">
+              <div class="stat-value">4.8</div>
+              <div class="stat-label">★ Rating</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">15"</div>
+              <div class="stat-label">New Snow</div>
+            </div>
+          </div>
+        </div>
+        <div class="snow-badge">
+          <span class="snow-text">15"</span>
+        </div>
+      </div>
+      
+      <div class="resort-card">
+        <img src="https://images.unsplash.com/photo-1605540436563-5bca919ae766?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="resort-image">
+        <div class="resort-gradient"></div>
+        <div class="resort-info">
+          <h3 class="resort-name">Aspen Snowmass</h3>
+          <p class="resort-location">Colorado, USA</p>
+          <div class="resort-stats">
+            <div class="stat-item">
+              <div class="stat-value">4.7</div>
+              <div class="stat-label">★ Rating</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">8"</div>
+              <div class="stat-label">New Snow</div>
+            </div>
+          </div>
+        </div>
+        <div class="snow-badge">
+          <span class="snow-text">8"</span>
+        </div>
+      </div>
+      
+      <div class="resort-card">
+        <img src="https://images.unsplash.com/photo-1453090927415-5f45085b65c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="resort-image">
+        <div class="resort-gradient"></div>
+        <div class="resort-info">
+          <h3 class="resort-name">Park City Mountain</h3>
+          <p class="resort-location">Utah, USA</p>
+          <div class="resort-stats">
+            <div class="stat-item">
+              <div class="stat-value">4.6</div>
+              <div class="stat-label">★ Rating</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">12"</div>
+              <div class="stat-label">New Snow</div>
+            </div>
+          </div>
+        </div>
+        <div class="snow-badge">
+          <span class="snow-text">12"</span>
+        </div>
+      </div>
+      
+      <div class="resort-card">
+        <img src="https://images.unsplash.com/photo-1488591216063-cb6ab485cece?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="resort-image">
+        <div class="resort-gradient"></div>
+        <div class="resort-info">
+          <h3 class="resort-name">Zermatt</h3>
+          <p class="resort-location">Switzerland</p>
+          <div class="resort-stats">
+            <div class="stat-item">
+              <div class="stat-value">4.9</div>
+              <div class="stat-label">★ Rating</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">20"</div>
+              <div class="stat-label">New Snow</div>
+            </div>
+          </div>
+        </div>
+        <div class="snow-badge">
+          <span class="snow-text">20"</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Login Modal -->
+  <div id="login-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeModal('login-modal')">&times;</span>
+      <h2 class="modal-title">Log In to PeakShare</h2>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email</label>
+          <input type="email" class="form-input" id="login-email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <input type="password" class="form-input" id="login-password" placeholder="Your password" required>
+        </div>
+        <button type="button" class="form-submit" onclick="handleLogin()">Log In</button>
+      </form>
+      <div class="form-footer">
+        Don't have an account? <span class="form-link" onclick="switchModal('login-modal', 'signup-modal')">Sign up</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Signup Modal -->
+  <div id="signup-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeModal('signup-modal')">&times;</span>
+      <h2 class="modal-title">Create a PeakShare Account</h2>
+      <form id="signup-form">
+        <div class="form-group">
+          <label class="form-label" for="signup-email">Email</label>
+          <input type="email" class="form-input" id="signup-email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-fullname">Full Name</label>
+          <input type="text" class="form-input" id="signup-fullname" placeholder="Your full name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-username">Username</label>
+          <input type="text" class="form-input" id="signup-username" placeholder="Choose a username" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-password">Password</label>
+          <input type="password" class="form-input" id="signup-password" placeholder="Create a password" required>
+        </div>
+        <button type="button" class="form-submit" onclick="handleSignup()">Sign Up</button>
+      </form>
+      <div class="form-footer">
+        Already have an account? <span class="form-link" onclick="switchModal('signup-modal', 'login-modal')">Log in</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Search functionality
+    document.querySelector('.search-input').addEventListener('input', function(e) {
+      const query = e.target.value.toLowerCase();
+      const resortCards = document.querySelectorAll('.resort-card');
+      
+      resortCards.forEach(card => {
+        const name = card.querySelector('.resort-name').textContent.toLowerCase();
+        const location = card.querySelector('.resort-location').textContent.toLowerCase();
+        
+        if (name.includes(query) || location.includes(query) || query === '') {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+    
+    // Modal functionality
+    function openModal(modalId) {
+      document.getElementById(modalId).style.display = 'block';
+    }
+    
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+    
+    function switchModal(closeModalId, openModalId) {
+      closeModal(closeModalId);
+      openModal(openModalId);
+    }
+    
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+      }
+    }
+    
+    // Handle login
+    function handleLogin() {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      
+      if (email && password) {
+        alert(`Logging in with email: ${email}`);
+        closeModal('login-modal');
+      } else {
+        alert('Please fill out all fields');
+      }
+    }
+    
+    // Handle signup
+    function handleSignup() {
+      const email = document.getElementById('signup-email').value;
+      const fullName = document.getElementById('signup-fullname').value;
+      const username = document.getElementById('signup-username').value;
+      const password = document.getElementById('signup-password').value;
+      
+      if (email && fullName && username && password) {
+        alert(`Account created for ${fullName} (${username})`);
+        closeModal('signup-modal');
+      } else {
+        alert('Please fill out all fields');
+      }
+    }
+  </script>
+</body>
+</html>

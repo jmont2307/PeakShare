@@ -1,6 +1,6 @@
 # PeakShare
 
-PeakShare is a mobile application for skiers and snowboarders to share their mountain experiences. Think of it as Instagram and Twitter specifically designed for winter sports enthusiasts.
+PeakShare is a web and mobile application for skiers and snowboarders to share their mountain experiences. Think of it as Instagram and Twitter specifically designed for winter sports enthusiasts.
 
 ## Features
 
@@ -8,52 +8,71 @@ PeakShare is a mobile application for skiers and snowboarders to share their mou
 - Social features including posts, likes, comments, and follows
 - Image uploads with multiple images per post
 - Instagram-style stories
-- Mountain resort exploration and information
+- Mountain resort exploration with real-time weather data
 - User profiles with skiing statistics
 - Real-time notifications
-- Responsive UI designed for mobile devices
+- Responsive UI designed for both web and mobile devices
+- Database seeding for ski resorts worldwide
 
 ## Tech Stack
 
-- **React Native**: Mobile app framework
+- **React Native / React Native Web**: Cross-platform app framework
 - **Expo**: Development platform for React Native
 - **Firebase**:
   - Authentication for user management
   - Firestore for database storage
   - Firebase Storage for image uploads
+  - Firebase Emulators for local development
 - **Redux Toolkit**: State management
 - **React Navigation**: Navigation between screens
+- **Weather API**: Real-time weather data for ski resorts
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js and npm installed
-- Expo CLI installed globally: `npm install -g expo-cli`
-- A Firebase account for the backend
+- Node.js (v14 or newer) and npm installed
+- A Firebase account for production deployment
 
 ### Setup
 
 1. Clone the repository:
-```
+```bash
 git clone https://github.com/yourusername/peakshare.git
 cd peakshare
 ```
 
 2. Install dependencies:
-```
+```bash
 npm install
 ```
 
-3. Create a Firebase project:
-   - Go to [Firebase Console](https://console.firebase.google.com/)
-   - Create a new project
-   - Enable Authentication with Email/Password
-   - Create a Firestore database
-   - Enable Storage
+### Running in Development Mode
 
-4. Configure Firebase:
-   - Replace the Firebase configuration in `src/firebase.js` with your own configuration:
+#### 1. Start the Firebase emulators
+
+This will run local versions of Firebase services (Auth, Firestore, Storage):
+
+```bash
+npm run firebase:emulators
+```
+
+You can view the Firebase emulator UI at http://localhost:4000
+
+#### 2. Start the development server
+
+In a new terminal window, run:
+
+```bash
+npm run dev
+```
+
+This will open the application in your browser at http://localhost:3000
+
+### Running in Production Mode
+
+1. Configure Firebase:
+   - Replace the Firebase configuration in `src/firebase.js` with your own configuration if needed:
 
 ```javascript
 const firebaseConfig = {
@@ -66,14 +85,26 @@ const firebaseConfig = {
 };
 ```
 
-5. Start the development server:
-```
+2. Update Firebase security rules:
+   - Edit `firestore.rules` and `storage.rules` to use the production rules
+   - Deploy the rules with `npm run firebase:deploy`
+
+3. Build and start the application:
+```bash
+npm run build
 npm start
 ```
 
-6. Open the app using Expo:
-   - Use the Expo Go app on your mobile device
-   - Or use an iOS/Android simulator
+### Running on Mobile
+
+For mobile development:
+
+```bash
+npm install -g expo-cli
+expo start
+```
+
+Use the Expo Go app on your mobile device or an iOS/Android simulator
 
 ## Firestore Database Structure
 
