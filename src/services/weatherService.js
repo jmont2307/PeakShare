@@ -1,17 +1,12 @@
-/**
- * Weather service for the PeakShare app
- * Uses OpenWeatherMap API for real weather data with fallback to mock data
- */
+
 import axios from 'axios';
 
 // OpenWeatherMap API key - this would normally be in an environment variable
-// Free tier key with limited usage
-const API_KEY = '9f2d8e174bd84d3bbad85021232401';
+const API_KEY = '5a132a14eae24211b1c01327252502';
 
 export const fetchWeatherForLocation = async (latitude, longitude, resortName = '') => {
   try {
-    // First try to get real weather data from OpenWeatherMap API
-    // We're using the free WeatherAPI.com service as an alternative
+    
     const apiUrl = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${latitude},${longitude}&days=1`;
     
     const response = await axios.get(apiUrl);
