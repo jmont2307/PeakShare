@@ -16,6 +16,247 @@ const MountainBackground = () => (
 
 // Sample data for resorts
 const SAMPLE_RESORTS = [
+  // Colorado Resorts
+  {
+    id: 'co1',
+    name: 'Arapahoe Basin',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1548802576-2e5fe216f802?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.7,
+    newSnow: 8,
+    description: 'Legendary status, underpriced, conveniently located, snow totals above average for Colorado.',
+    weather: {
+      temperature: -3,
+      conditions: 'Partly Cloudy',
+      snowDepth: 85
+    }
+  },
+  {
+    id: 'co2',
+    name: 'Aspen Mountain',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1605540436563-5bca919ae766?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.9,
+    newSnow: 5,
+    description: 'Glitz, glamour, and great skiing are all a part of the scene here, but none of it comes cheap in Aspen.',
+    weather: {
+      temperature: -2,
+      conditions: 'Sunny',
+      snowDepth: 95
+    }
+  },
+  {
+    id: 'co3',
+    name: 'Aspen Highlands',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1591500715014-0c51a8f7e2b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.8,
+    newSnow: 7,
+    description: 'This is the toughest of the 4 resorts in the Aspen/Snowmass area. The resort is located between Buttermilk Mountain and Aspen Mountain.',
+    weather: {
+      temperature: -4,
+      conditions: 'Light Snow',
+      snowDepth: 90
+    }
+  },
+  {
+    id: 'co4',
+    name: 'Beaver Creek',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1548132236-48744fc3c516?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.8,
+    newSnow: 10,
+    description: 'This is a luxury ski resort that is a short drive from Vail, in the same price range, and also owned by Vail Resorts.',
+    weather: {
+      temperature: -1,
+      conditions: 'Sunny',
+      snowDepth: 88
+    }
+  },
+  {
+    id: 'co5',
+    name: 'Breckenridge',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1577401239170-897942555fb3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.7,
+    newSnow: 12,
+    description: 'Breckenridge is one of Summit County\'s ski resorts, and like many others, this one belongs to Vail Resorts. Breckenridge is generally considered to be a world-class resort but a level below Vail or Telluride.',
+    weather: {
+      temperature: -3,
+      conditions: 'Cloudy',
+      snowDepth: 100
+    }
+  },
+  {
+    id: 'co6',
+    name: 'Buttermilk',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1517394834181-95ed159986c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.5,
+    newSnow: 6,
+    description: 'This is the smallest of the Aspen/Snowmass ski areas and it is known for being a beginner\'s hill with a great top-to-bottom terrain park.',
+    weather: {
+      temperature: -1,
+      conditions: 'Sunny',
+      snowDepth: 75
+    }
+  },
+  {
+    id: 'co7',
+    name: 'Copper Mountain',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1548107861-414ef012ef3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.6,
+    newSnow: 9,
+    description: 'There is no category where Copper Mountain fails. It is in close proximity to many other world-class resorts and this makes it hard for Copper to stick out, so sometimes it seems a bit underrated.',
+    weather: {
+      temperature: -2,
+      conditions: 'Clear',
+      snowDepth: 95
+    }
+  },
+  {
+    id: 'co8',
+    name: 'Crested Butte',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1574958269340-fa927503f3dd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.7,
+    newSnow: 15,
+    description: 'Located in the center of the state and deep in the mountains, Crested Butte has a reputation for having a great ski resort and a terrible post office.',
+    weather: {
+      temperature: -5,
+      conditions: 'Snowing',
+      snowDepth: 110
+    }
+  },
+  {
+    id: 'co9',
+    name: 'Echo Mountain',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1551283279-f6a1111cd022?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.0,
+    newSnow: 4,
+    description: 'This is a small ski area located less than a 1-hour drive from Denver, near Idaho Springs and Mt Evans. Echo Mountain has about 600 feet of vertical rise.',
+    weather: {
+      temperature: 0,
+      conditions: 'Partly Cloudy',
+      snowDepth: 60
+    }
+  },
+  {
+    id: 'co10',
+    name: 'Eldora',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1575562941789-5377678b9a1c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.2,
+    newSnow: 5,
+    description: 'Eldora is another ski resort that is in close proximity to Denver. Eldora is located to the north of I-70 and only about 30 minutes from Boulder.',
+    weather: {
+      temperature: -1,
+      conditions: 'Clear',
+      snowDepth: 65
+    }
+  },
+  {
+    id: 'co11',
+    name: 'Keystone',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1605550540705-2ee4073b34fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.6,
+    newSnow: 11,
+    description: 'Keystone has 3 mountains of great terrain, and might be the most family-friendly resort in Summit County. You can ski Keystone on the same lift ticket as Breckenridge.',
+    weather: {
+      temperature: -3,
+      conditions: 'Light Snow',
+      snowDepth: 90
+    }
+  },
+  {
+    id: 'co12',
+    name: 'Loveland',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1570737543098-0983d88f5ef7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.5,
+    newSnow: 10,
+    description: 'Close to Denver and high on the Continental Divide, almost everyone traveling west on I-70 into the mountains will pass by the Loveland Ski Area.',
+    weather: {
+      temperature: -4,
+      conditions: 'Cloudy',
+      snowDepth: 85
+    }
+  },
+  {
+    id: 'co13',
+    name: 'Steamboat',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1502126324834-38f8e02d7160?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.7,
+    newSnow: 18,
+    description: 'A well-rounded ski area with a world-class reputation to uphold. The lower portion offers night skiing now, and the base area here is always evolving as the resort develops.',
+    weather: {
+      temperature: -6,
+      conditions: 'Powder',
+      snowDepth: 125
+    }
+  },
+  {
+    id: 'co14',
+    name: 'Telluride',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1587125388633-6c2191994ce8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.9,
+    newSnow: 14,
+    description: 'Telluride is easily among Colorado\'s top 3 resorts and it has a long list of credentials to back that up in almost every category. This resort is especially loved by expert skiers.',
+    weather: {
+      temperature: -5,
+      conditions: 'Partly Cloudy',
+      snowDepth: 115
+    }
+  },
+  {
+    id: 'co15',
+    name: 'Vail',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1515876305430-f06edab8282a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.9,
+    newSnow: 12,
+    description: 'Right alongside of Telluride as one of Colorado\'s top ski resorts, Vail boasts the most skiable acres of any resort in Colorado. The nightlife, shopping, and dining in the base area villages are abundant and uniquely Colorado.',
+    weather: {
+      temperature: -2,
+      conditions: 'Clear',
+      snowDepth: 105
+    }
+  },
+  {
+    id: 'co16',
+    name: 'Winter Park',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1551524559-8af4e6624178?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.7,
+    newSnow: 16,
+    description: 'This is the largest of the ski resorts in Colorado\'s Front Range and it is about a 1.5-hour drive from Denver International Airport. You can also access Winter Park by train now from Denver\'s Union Station.',
+    weather: {
+      temperature: -4,
+      conditions: 'Snowing',
+      snowDepth: 100
+    }
+  },
+  {
+    id: 'co17',
+    name: 'Wolf Creek',
+    location: 'Colorado, USA',
+    imageUrl: 'https://images.unsplash.com/photo-1488841714725-bb4c32d1ac94?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    rating: 4.6,
+    newSnow: 22,
+    description: 'Wolf Creek has a reputation for deep powder skiing and it is a destination for Rocky Mountain storm chasers throughout the season as the storms come and go.',
+    weather: {
+      temperature: -7,
+      conditions: 'Heavy Snow',
+      snowDepth: 160
+    }
+  },
+  
+  // International Resorts
   {
     id: '1',
     name: 'Whistler Blackcomb',
@@ -28,34 +269,6 @@ const SAMPLE_RESORTS = [
       temperature: -5,
       conditions: 'Partly Cloudy',
       snowDepth: 120
-    }
-  },
-  {
-    id: '2',
-    name: 'Aspen Snowmass',
-    location: 'Colorado, USA',
-    imageUrl: 'https://images.unsplash.com/photo-1605540436563-5bca919ae766?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    rating: 4.7,
-    newSnow: 8,
-    description: 'Four mountains of world-class skiing and snowboarding in the heart of the Colorado Rockies.',
-    weather: {
-      temperature: -2,
-      conditions: 'Sunny',
-      snowDepth: 95
-    }
-  },
-  {
-    id: '3',
-    name: 'Park City Mountain',
-    location: 'Utah, USA',
-    imageUrl: 'https://images.unsplash.com/photo-1453090927415-5f45085b65c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    rating: 4.6,
-    newSnow: 12,
-    description: 'America\'s largest single ski resort with over 7,300 acres of terrain.',
-    weather: {
-      temperature: -1,
-      conditions: 'Snowing',
-      snowDepth: 110
     }
   },
   {
@@ -667,6 +880,9 @@ export default function SimpleApp() {
   const [isUploadingImage, setIsUploadingImage] = useState(false); // Flag for image upload
   const fileInputRef = useRef(null); // Reference to the file input
   const [viewingFullProfile, setViewingFullProfile] = useState(null); // User for full profile view
+  const [viewingImage, setViewingImage] = useState(null); // Image URL for fullscreen view
+  const [isNewPostAreaCollapsed, setIsNewPostAreaCollapsed] = useState(false); // State for collapsing the new post area
+  const scrollYRef = useRef(0); // Track scroll position
   
   // Render feed tab with real posts
   // Format post content with hashtag highlighting
@@ -870,13 +1086,19 @@ export default function SimpleApp() {
           
           {/* Post image (if available) */}
           {post.imageUrl && (
-            <View style={styles.postImageContainer}>
+            <TouchableOpacity 
+              style={styles.postImageContainer}
+              onPress={() => {
+                // Show image in fullscreen modal
+                setViewingImage(post.imageUrl);
+              }}
+            >
               <Image 
                 source={{ uri: post.imageUrl }} 
                 style={styles.postImage}
-                resizeMode="cover"
+                resizeMode="contain"
               />
-            </View>
+            </TouchableOpacity>
           )}
           
           <View style={styles.postActions}>
@@ -984,15 +1206,38 @@ export default function SimpleApp() {
       <View style={styles.tabContent}>
         {isLoggedIn ? (
           <>
-            <View style={styles.newPostContainer}>
-              <View style={styles.newPostHeader}>
-                <View style={styles.userAvatarSmall}>
-                  <Text style={styles.userInitialsSmall}>
-                    {currentUser?.username?.charAt(0).toUpperCase() || 'U'}
+            <View style={[
+              styles.newPostContainer,
+              isNewPostAreaCollapsed && styles.newPostContainerCollapsed
+            ]}>
+              {isNewPostAreaCollapsed ? (
+                // Collapsed view
+                <TouchableOpacity 
+                  style={styles.newPostCollapsedButton}
+                  onPress={() => setIsNewPostAreaCollapsed(false)}
+                >
+                  <Text style={styles.newPostCollapsedText}>
+                    Create a post... 📝
                   </Text>
-                </View>
-                <Text style={styles.newPostPrompt}>What's on your mind, {currentUser?.fullName?.split(' ')[0] || 'skier'}?</Text>
-              </View>
+                </TouchableOpacity>
+              ) : (
+                // Expanded view
+                <>
+                  <View style={styles.newPostHeader}>
+                    {currentUser?.profileImageUrl ? (
+                      <Image 
+                        source={{ uri: currentUser.profileImageUrl }} 
+                        style={styles.userAvatarSmallImage} 
+                      />
+                    ) : (
+                      <View style={styles.userAvatarSmall}>
+                        <Text style={styles.userInitialsSmall}>
+                          {currentUser?.username?.charAt(0).toUpperCase() || 'U'}
+                        </Text>
+                      </View>
+                    )}
+                    <Text style={styles.newPostPrompt}>What's on your mind, {currentUser?.fullName?.split(' ')[0] || 'skier'}?</Text>
+                  </View>
               
               <TextInput
                 style={styles.newPostInput}
@@ -1069,6 +1314,8 @@ export default function SimpleApp() {
                   <Text style={styles.postButtonText}>Share Post</Text>
                 </TouchableOpacity>
               </View>
+                </>
+              )}
             </View>
             
             {/* Feed Tabs */}
@@ -1092,7 +1339,25 @@ export default function SimpleApp() {
               </TouchableOpacity>
             </View>
             
-            <ScrollView style={styles.feedScroll}>
+            <ScrollView 
+              style={styles.feedScroll}
+              onScroll={(event) => {
+                const currentScrollY = event.nativeEvent.contentOffset.y;
+                
+                // Determine if we need to collapse or expand based on scroll direction
+                if (currentScrollY > scrollYRef.current + 10 && !isNewPostAreaCollapsed) {
+                  // Scrolling down
+                  setIsNewPostAreaCollapsed(true);
+                } else if (currentScrollY < scrollYRef.current - 40 && isNewPostAreaCollapsed && currentScrollY < 50) {
+                  // Scrolling up and near the top
+                  setIsNewPostAreaCollapsed(false);
+                }
+                
+                // Save current position
+                scrollYRef.current = currentScrollY;
+              }}
+              scrollEventThrottle={16} // Throttle scroll events to improve performance
+            >
               {displayPosts.length > 0 ? (
                 displayPosts.map(post => renderPostItem(post))
               ) : (
@@ -1403,136 +1668,360 @@ export default function SimpleApp() {
     );
   };
 
-  // Render profile tab (simplified)
-  const renderProfileTab = () => (
-    <View style={styles.tabContent}>
-      <ScrollView>
-        <View style={styles.profileHeader}>
-          <View style={styles.profileImageContainer}>
-            <View style={styles.profileImagePlaceholder}>
-              <Text style={styles.profileImageText}>
-                {isLoggedIn ? (currentUser?.username?.charAt(0).toUpperCase() || 'U') : 'G'}
-              </Text>
-            </View>
+  // Render profile tab with user posts
+  const renderProfileTab = () => {
+    // Get current user's posts if logged in
+    const userPosts = isLoggedIn 
+      ? posts
+        .filter(post => post.userId === currentUser.id)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      : [];
+      
+    // State for edit profile form
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [editFullName, setEditFullName] = useState('');
+    const [editBio, setEditBio] = useState('');
+    const [editProfileImage, setEditProfileImage] = useState(null);
+    const profileImageInputRef = useRef(null);
+    
+    // Handle profile edit
+    const handleEditProfile = () => {
+      setEditFullName(currentUser?.fullName || '');
+      setEditBio(currentUser?.bio || '');
+      setIsEditingProfile(true);
+    };
+    
+    // Handle save profile changes
+    const handleSaveProfile = () => {
+      if (!isLoggedIn) return;
+      
+      // Update the current user
+      const updatedUser = {
+        ...currentUser,
+        fullName: editFullName,
+        bio: editBio,
+        profileImageUrl: editProfileImage || currentUser.profileImageUrl
+      };
+      
+      // Update in the users array
+      const updatedUsers = users.map(user => 
+        user.id === currentUser.id ? updatedUser : user
+      );
+      
+      // Save changes
+      setCurrentUser(updatedUser);
+      setUsers(updatedUsers);
+      
+      // Save to local storage
+      if (localStorageAvailable) {
+        localStorage.setItem('peakshare_current_user', JSON.stringify(updatedUser));
+        localStorage.setItem('peakshare_users', JSON.stringify(updatedUsers));
+      }
+      
+      // Close edit mode
+      setIsEditingProfile(false);
+    };
+    
+    // Handle profile image selection
+    const handleProfileImageSelect = (event) => {
+      if (event.target.files && event.target.files[0]) {
+        const file = event.target.files[0];
+        const imageUrl = URL.createObjectURL(file);
+        setEditProfileImage(imageUrl);
+      }
+    };
+    
+    return (
+      <View style={styles.tabContent}>
+        <ScrollView>
+          <View style={styles.profileHeader}>
+            <TouchableOpacity 
+              style={styles.profileImageContainer}
+              onPress={() => isLoggedIn && profileImageInputRef.current?.click()}
+            >
+              {(isLoggedIn && currentUser?.profileImageUrl) ? (
+                <Image 
+                  source={{ uri: currentUser.profileImageUrl }} 
+                  style={styles.profileImage} 
+                />
+              ) : (
+                <View style={styles.profileImagePlaceholder}>
+                  <Text style={styles.profileImageText}>
+                    {isLoggedIn ? (currentUser?.username?.charAt(0).toUpperCase() || 'U') : 'G'}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            
+            <Text style={styles.profileName}>
+              {isLoggedIn ? (currentUser?.fullName || currentUser?.username || "User") : "Guest User"}
+            </Text>
+            <Text style={styles.profileBio}>
+              {isLoggedIn ? "@" + (currentUser?.username || "username") : "Welcome to PeakShare"}
+            </Text>
+            {isLoggedIn && currentUser?.bio && (
+              <Text style={styles.profileBioText}>{currentUser.bio}</Text>
+            )}
+            
+            {isLoggedIn ? (
+              <View style={styles.profileActions}>
+                <TouchableOpacity
+                  style={styles.editProfileButton}
+                  onPress={handleEditProfile}
+                >
+                  <Text style={styles.editProfileButtonText}>Edit Profile</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={styles.logoutButton}
+                  onPress={() => {
+                    // Log out user
+                    setIsLoggedIn(false);
+                    setCurrentUser(null);
+                    
+                    // Remove from local storage
+                    if (localStorageAvailable) {
+                      localStorage.removeItem('peakshare_current_user');
+                    }
+                  }}
+                >
+                  <Text style={styles.logoutButtonText}>Sign Out</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.authButtonsRow}>
+                <TouchableOpacity
+                  style={styles.loginButtonProfile}
+                  onPress={() => setAuthMode('login')}
+                >
+                  <Text style={styles.loginButtonTextProfile}>Sign In</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={styles.signupButtonProfile}
+                  onPress={() => setAuthMode('signup')}
+                >
+                  <Text style={styles.signupButtonTextProfile}>Sign Up</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
           
-          <Text style={styles.profileName}>
-            {isLoggedIn ? (currentUser?.fullName || currentUser?.username || "User") : "Guest User"}
-          </Text>
-          <Text style={styles.profileBio}>
-            {isLoggedIn ? "@" + (currentUser?.username || "username") : "Welcome to PeakShare"}
-          </Text>
-          
-          {isLoggedIn ? (
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={() => {
-                // Log out user
-                setIsLoggedIn(false);
-                setCurrentUser(null);
-                
-                // Remove from local storage
-                if (localStorageAvailable) {
-                  localStorage.removeItem('peakshare_current_user');
-                }
-              }}
-            >
-              <Text style={styles.logoutButtonText}>Sign Out</Text>
+          <View style={styles.statsRow}>
+            <TouchableOpacity style={styles.statBox} onPress={() => isLoggedIn && setActiveTab('feed')}>
+              <Text style={styles.statBoxValue}>
+                {isLoggedIn ? getUserStats(currentUser.id).postCount : '0'}
+              </Text>
+              <Text style={styles.statBoxLabel}>Posts</Text>
             </TouchableOpacity>
-          ) : (
-            <View style={styles.authButtonsRow}>
-              <TouchableOpacity
-                style={styles.loginButtonProfile}
-                onPress={() => setAuthMode('login')}
-              >
-                <Text style={styles.loginButtonTextProfile}>Sign In</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={styles.signupButtonProfile}
-                onPress={() => setAuthMode('signup')}
-              >
-                <Text style={styles.signupButtonTextProfile}>Sign Up</Text>
-              </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.statBox} 
+              onPress={() => isLoggedIn && setShowFollowersModal(true)}
+            >
+              <Text style={styles.statBoxValue}>
+                {isLoggedIn ? getUserStats(currentUser.id).followerCount : '0'}
+              </Text>
+              <Text style={styles.statBoxLabel}>Followers</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.statBox} 
+              onPress={() => isLoggedIn && setShowFollowingModal(true)}
+            >
+              <Text style={styles.statBoxValue}>
+                {isLoggedIn ? getUserStats(currentUser.id).followingCount : '0'}
+              </Text>
+              <Text style={styles.statBoxLabel}>Following</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Hidden file input for profile image */}
+          {isLoggedIn && (
+            <input
+              type="file"
+              ref={profileImageInputRef}
+              style={{ display: 'none' }}
+              accept="image/*"
+              onChange={handleProfileImageSelect}
+            />
+          )}
+          
+          {/* Edit Profile Modal */}
+          {isEditingProfile && (
+            <View style={styles.modalOverlay}>
+              <View style={styles.editProfileModal}>
+                <View style={styles.editProfileHeader}>
+                  <Text style={styles.editProfileTitle}>Edit Profile</Text>
+                  <TouchableOpacity 
+                    style={styles.closeEditProfileButton}
+                    onPress={() => setIsEditingProfile(false)}
+                  >
+                    <Text style={styles.closeEditProfileText}>×</Text>
+                  </TouchableOpacity>
+                </View>
+                
+                <View style={styles.editProfileContent}>
+                  <TouchableOpacity 
+                    style={styles.editProfileImageContainer}
+                    onPress={() => profileImageInputRef.current?.click()}
+                  >
+                    {editProfileImage || currentUser?.profileImageUrl ? (
+                      <Image 
+                        source={{ uri: editProfileImage || currentUser?.profileImageUrl }} 
+                        style={styles.editProfileImage} 
+                      />
+                    ) : (
+                      <View style={styles.editProfileImagePlaceholder}>
+                        <Text style={styles.editProfileImageText}>
+                          {currentUser?.username?.charAt(0).toUpperCase() || 'U'}
+                        </Text>
+                      </View>
+                    )}
+                    <View style={styles.editProfileImageOverlay}>
+                      <Text style={styles.editProfileImageOverlayText}>Change</Text>
+                    </View>
+                  </TouchableOpacity>
+                  
+                  <Text style={styles.editProfileLabel}>Full Name</Text>
+                  <TextInput 
+                    style={styles.editProfileInput}
+                    value={editFullName}
+                    onChangeText={setEditFullName}
+                    placeholder="Enter your full name"
+                  />
+                  
+                  <Text style={styles.editProfileLabel}>Bio</Text>
+                  <TextInput 
+                    style={[styles.editProfileInput, styles.editProfileBioInput]}
+                    value={editBio}
+                    onChangeText={setEditBio}
+                    placeholder="Tell us about yourself..."
+                    multiline
+                    numberOfLines={3}
+                  />
+                  
+                  <TouchableOpacity 
+                    style={styles.saveProfileButton}
+                    onPress={handleSaveProfile}
+                  >
+                    <Text style={styles.saveProfileButtonText}>Save Changes</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
           )}
-        </View>
-        
-        <View style={styles.statsRow}>
-          <TouchableOpacity style={styles.statBox} onPress={() => isLoggedIn && setActiveTab('feed')}>
-            <Text style={styles.statBoxValue}>
-              {isLoggedIn ? getUserStats(currentUser.id).postCount : '0'}
+          
+          {/* User Posts Section */}
+          {isLoggedIn && (
+            <>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>My Posts</Text>
+              </View>
+              
+              {userPosts.length > 0 ? (
+                <View style={styles.userPostsSection}>
+                  {userPosts.map(post => {
+                    const postResort = post.resortId 
+                      ? SAMPLE_RESORTS.find(resort => resort.id === post.resortId)
+                      : null;
+                    
+                    return (
+                      <View key={post.id} style={styles.profilePostCard}>
+                        <View style={styles.profilePostHeader}>
+                          <Text style={styles.profilePostTime}>
+                            {new Date(post.createdAt).toLocaleDateString()}
+                          </Text>
+                          <View style={styles.profilePostHeaderRight}>
+                            {postResort && (
+                              <TouchableOpacity
+                                onPress={() => setSelectedResort(postResort)}
+                              >
+                                <Text style={styles.profilePostResort}>{postResort.name}</Text>
+                              </TouchableOpacity>
+                            )}
+                            
+                            {/* Delete button */}
+                            <TouchableOpacity
+                              style={styles.profileDeleteButton}
+                              onPress={() => deletePost(post.id)}
+                            >
+                              <Text style={styles.profileDeleteButtonText}>🗑️</Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                        
+                        <View style={styles.profilePostContent}>
+                          {formatPostContent(post.content)}
+                        </View>
+                        
+                        {post.imageUrl && (
+                          <TouchableOpacity 
+                            style={styles.profilePostImageContainer}
+                            onPress={() => setViewingImage(post.imageUrl)}
+                          >
+                            <Image 
+                              source={{ uri: post.imageUrl }} 
+                              style={styles.profilePostImage}
+                              resizeMode="contain"
+                            />
+                          </TouchableOpacity>
+                        )}
+                        
+                        <View style={styles.profilePostStats}>
+                          <Text style={styles.profilePostStat}>
+                            ❤️ {post.likes}
+                          </Text>
+                          <Text style={styles.profilePostStat}>
+                            💬 {post.comments?.length || 0}
+                          </Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              ) : (
+                <View style={styles.activityEmptyState}>
+                  <Text style={styles.activityEmptyText}>
+                    No posts yet. Share your first ski experience!
+                  </Text>
+                  <TouchableOpacity 
+                    style={styles.newPostButton}
+                    onPress={() => setActiveTab('feed')}
+                  >
+                    <Text style={styles.newPostButtonText}>Create Post</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </>
+          )}
+          
+          <View style={styles.infoCard}>
+            <Text style={styles.infoCardTitle}>About PeakShare</Text>
+            <Text style={styles.infoCardText}>
+              PeakShare is a social platform for ski and snowboard enthusiasts.
+              Share your mountain experiences, discover new resorts, check snow conditions, 
+              and connect with other winter sports fans.
             </Text>
-            <Text style={styles.statBoxLabel}>Posts</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.statBox} 
-            onPress={() => isLoggedIn && setShowFollowersModal(true)}
-          >
-            <Text style={styles.statBoxValue}>
-              {isLoggedIn ? getUserStats(currentUser.id).followerCount : '0'}
-            </Text>
-            <Text style={styles.statBoxLabel}>Followers</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.statBox} 
-            onPress={() => isLoggedIn && setShowFollowingModal(true)}
-          >
-            <Text style={styles.statBoxValue}>
-              {isLoggedIn ? getUserStats(currentUser.id).followingCount : '0'}
-            </Text>
-            <Text style={styles.statBoxLabel}>Following</Text>
-          </TouchableOpacity>
-        </View>
-        
-        {isLoggedIn && (
-          <>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Recent Activity</Text>
-            </View>
-            <View style={styles.activityEmptyState}>
-              <Text style={styles.activityEmptyText}>
-                {getUserStats(currentUser.id).postCount > 0 
-                  ? 'Your posts will appear in the Feed tab'
-                  : 'No posts yet. Share your first ski experience!'}
-              </Text>
-              <TouchableOpacity 
-                style={styles.newPostButton}
-                onPress={() => setActiveTab('feed')}
-              >
-                <Text style={styles.newPostButtonText}>Create Post</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
-        
-        <View style={styles.infoCard}>
-          <Text style={styles.infoCardTitle}>About PeakShare</Text>
-          <Text style={styles.infoCardText}>
-            PeakShare is a social platform for ski and snowboard enthusiasts.
-            Share your mountain experiences, discover new resorts, check snow conditions, 
-            and connect with other winter sports fans.
-          </Text>
-        </View>
-        
-        <View style={styles.featuredResorts}>
-          <Text style={styles.featuredResortsTitle}>Featured Resorts</Text>
-          <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={styles.featuredResortsList}>
-            {SAMPLE_RESORTS.slice(0, 3).map(resort => (
-              <TouchableOpacity 
-                key={resort.id} 
-                style={styles.featuredResortCard}
-                onPress={() => setSelectedResort(resort)}
-              >
-                <Image source={{ uri: resort.imageUrl }} style={styles.featuredResortImage} />
-                <Text style={styles.featuredResortName}>{resort.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      </ScrollView>
-    </View>
-  );
+          </View>
+          
+          <View style={styles.featuredResorts}>
+            <Text style={styles.featuredResortsTitle}>Featured Resorts</Text>
+            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={styles.featuredResortsList}>
+              {SAMPLE_RESORTS.slice(0, 3).map(resort => (
+                <TouchableOpacity 
+                  key={resort.id} 
+                  style={styles.featuredResortCard}
+                  onPress={() => setSelectedResort(resort)}
+                >
+                  <Image source={{ uri: resort.imageUrl }} style={styles.featuredResortImage} />
+                  <Text style={styles.featuredResortName}>{resort.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
   
   // Render user list for followers/following modals
   const renderUserListItem = (user, isFollowers = true) => (
@@ -1757,13 +2246,16 @@ export default function SimpleApp() {
                     </View>
                     
                     {post.imageUrl && (
-                      <View style={styles.fullProfilePostImageContainer}>
+                      <TouchableOpacity 
+                        style={styles.fullProfilePostImageContainer}
+                        onPress={() => setViewingImage(post.imageUrl)}
+                      >
                         <Image 
                           source={{ uri: post.imageUrl }} 
                           style={styles.fullProfilePostImage}
-                          resizeMode="cover"
+                          resizeMode="contain"
                         />
-                      </View>
+                      </TouchableOpacity>
                     )}
                     
                     <View style={styles.fullProfilePostStats}>
@@ -2018,6 +2510,30 @@ export default function SimpleApp() {
     );
   };
   
+  // Render fullscreen image view
+  const renderFullscreenImage = () => {
+    if (!viewingImage) return null;
+    
+    return (
+      <View style={styles.fullscreenImageOverlay}>
+        <TouchableOpacity 
+          style={styles.fullscreenImageCloseButton}
+          onPress={() => setViewingImage(null)}
+        >
+          <Text style={styles.fullscreenImageCloseText}>×</Text>
+        </TouchableOpacity>
+        
+        <View style={styles.fullscreenImageContainer}>
+          <Image 
+            source={{ uri: viewingImage }} 
+            style={styles.fullscreenImage}
+            resizeMode="contain"
+          />
+        </View>
+      </View>
+    );
+  };
+  
   // Main application view with tabs
   return (
     <View style={styles.container}>
@@ -2032,11 +2548,18 @@ export default function SimpleApp() {
             onPress={() => setActiveTab('profile')}
             style={styles.userAvatarButton}
           >
-            <View style={styles.userAvatar}>
-              <Text style={styles.userInitials}>
-                {currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : 'U'}
-              </Text>
-            </View>
+            {currentUser?.profileImageUrl ? (
+              <Image 
+                source={{ uri: currentUser.profileImageUrl }} 
+                style={styles.userAvatarImage} 
+              />
+            ) : (
+              <View style={styles.userAvatar}>
+                <Text style={styles.userInitials}>
+                  {currentUser?.username ? currentUser.username.charAt(0).toUpperCase() : 'U'}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         ) : (
           <TouchableOpacity 
@@ -2084,6 +2607,7 @@ export default function SimpleApp() {
       {showFollowersModal && renderFollowersModal()}
       {showFollowingModal && renderFollowingModal()}
       {viewingProfile && renderProfileModal()}
+      {viewingImage && renderFullscreenImage()}
     </View>
   );
 }
@@ -2292,7 +2816,13 @@ const styles = StyleSheet.create({
   },
   imagePreview: {
     width: '100%',
-    height: 200,
+    maxHeight: 300,
+    aspectRatio: 1.5,
+  },
+  userAvatarSmallImage: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
   removeImageButton: {
     position: 'absolute',
@@ -2327,10 +2857,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 8,
     overflow: 'hidden',
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
   },
   postImage: {
     width: '100%',
-    height: 240,
+    height: undefined,
+    aspectRatio: 1,
+    maxHeight: 500,
   },
   userPostImageContainer: {
     marginTop: 8,
@@ -2340,7 +2874,8 @@ const styles = StyleSheet.create({
   },
   userPostImage: {
     width: '100%',
-    height: 180,
+    aspectRatio: 1.5,
+    maxHeight: 240,
   },
   
   // Post delete buttons
@@ -2376,6 +2911,288 @@ const styles = StyleSheet.create({
   fullProfileDeleteButtonText: {
     fontSize: 16,
     color: '#666',
+  },
+  
+  // Profile image styles
+  profileImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 50,
+  },
+  
+  // Profile edit styles
+  profileActions: {
+    flexDirection: 'row',
+    marginTop: 15,
+    justifyContent: 'center',
+  },
+  editProfileButton: {
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  editProfileButtonText: {
+    color: '#333',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  profileBioText: {
+    textAlign: 'center',
+    color: '#666',
+    fontSize: 14,
+    marginTop: 5,
+    paddingHorizontal: 20,
+  },
+  
+  // Profile posts
+  userPostsSection: {
+    paddingHorizontal: 15,
+  },
+  profilePostCard: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    marginBottom: 15,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  profilePostHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  profilePostHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  profilePostTime: {
+    fontSize: 14,
+    color: '#888',
+  },
+  profilePostResort: {
+    fontSize: 14,
+    color: '#0077cc',
+    fontWeight: '500',
+  },
+  profileDeleteButton: {
+    marginLeft: 10,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileDeleteButtonText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  profilePostContent: {
+    marginBottom: 10,
+  },
+  profilePostImageContainer: {
+    marginVertical: 10,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#f0f0f0',
+  },
+  profilePostImage: {
+    width: '100%',
+    height: undefined,
+    aspectRatio: 1,
+    maxHeight: 400,
+  },
+  profilePostStats: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    paddingTop: 10,
+    marginTop: 5,
+  },
+  profilePostStat: {
+    fontSize: 14,
+    color: '#666',
+    marginRight: 15,
+  },
+  
+  // Edit profile modal
+  editProfileModal: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    width: '90%',
+    maxWidth: 400,
+    maxHeight: '90%',
+    overflow: 'hidden',
+  },
+  editProfileHeader: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    padding: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  editProfileTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  closeEditProfileButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeEditProfileText: {
+    fontSize: 20,
+    color: '#555',
+    fontWeight: 'bold',
+    lineHeight: 24,
+  },
+  editProfileContent: {
+    padding: 20,
+  },
+  editProfileImageContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignSelf: 'center',
+    marginBottom: 20,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  editProfileImage: {
+    width: '100%',
+    height: '100%',
+  },
+  editProfileImagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#0077cc',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editProfileImageText: {
+    fontSize: 36,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  editProfileImageOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    padding: 5,
+    alignItems: 'center',
+  },
+  editProfileImageOverlayText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  editProfileLabel: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 5,
+    fontWeight: '500',
+  },
+  editProfileInput: {
+    backgroundColor: '#f5f5f5',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  editProfileBioInput: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  saveProfileButton: {
+    backgroundColor: '#0077cc',
+    borderRadius: 25,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  saveProfileButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  
+  // Fullscreen image modal styles
+  fullscreenImageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  fullscreenImageContainer: {
+    width: '100%',
+    height: '90%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullscreenImage: {
+    width: '100%',
+    height: '100%',
+  },
+  fullscreenImageCloseButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1001,
+  },
+  fullscreenImageCloseText: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+    lineHeight: 26,
+  },
+  userAvatarImage: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+  },
+  
+  // Collapsible new post area styles
+  newPostContainerCollapsed: {
+    height: 50,
+    padding: 0,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  newPostCollapsedButton: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 15,
+  },
+  newPostCollapsedText: {
+    color: '#888',
+    fontSize: 16,
   },
   
   // Profile action row
@@ -2519,7 +3336,9 @@ const styles = StyleSheet.create({
   },
   fullProfilePostImage: {
     width: '100%',
-    height: 240,
+    height: undefined,
+    aspectRatio: 1,
+    maxHeight: 400,
   },
   fullProfilePostStats: {
     flexDirection: 'row',
@@ -3323,6 +4142,7 @@ const styles = StyleSheet.create({
   },
   feedScroll: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
   },
   postCard: {
     backgroundColor: 'white',
