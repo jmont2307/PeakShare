@@ -1,5 +1,10 @@
 import * as Location from 'expo-location';
-import { MAPS_API_KEY } from '@env';
+import { GOOGLE_MAPS_API_KEY } from '@env';
+
+// Google Maps API endpoints
+const GEOCODING_API_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
+const PLACES_API_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
+const PLACE_DETAILS_API_URL = 'https://maps.googleapis.com/maps/api/place/details/json';
 
 // Get current location permissions
 export const requestLocationPermissions = async () => {
@@ -44,39 +49,58 @@ export const getCurrentLocation = async () => {
   }
 };
 
-// Get location details from coordinates
+// Get location details from coordinates using Google Maps Geocoding API
 export const getLocationDetails = async (latitude, longitude) => {
   try {
-    // Use the Abstract API for geolocation
-    const MAPS_apiURL = `https://ipgeolocation.abstractapi.com/v1/?api_key=${MAPS_API_KEY}`;
-    const response = await fetch(MAPS_apiURL);
+    // Construct the API URL with the Google Maps API key
+    const url = `${GEOCODING_API_URL}?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
+    
+    const response = await fetch(url);
     const data = await response.json();
     
-    if (data) {
+    if (data.status !== 'OK') {
+      console.warn(`Geocoding API error: ${data.status} - ${data.error_message || 'Unknown error'}`);
+      // Return basic location info on error
       return {
         success: true,
-        placeId: data.ip_address || '',
-        formattedAddress: `${data.city}, ${data.region}, ${data.country}`,
-        city: data.city || '',
-        state: data.region || '',
-        country: data.country || '',
-        fullAddress: `${data.city}, ${data.region}, ${data.country}`,
+        formattedAddress: `${latitude}, ${longitude}`,
+        city: '',
+        state: '',
+        country: '',
+        placeId: '',
       };
     }
     
-    // If the API fails, return basic location info
+    // Extract relevant address components
+    const addressComponents = data.results[0]?.address_components || [];
+    
+    let city = '';
+    let state = '';
+    let country = '';
+    let formattedAddress = data.results[0]?.formatted_address || '';
+    
+    addressComponents.forEach(component => {
+      if (component.types.includes('locality')) {
+        city = component.long_name;
+      } else if (component.types.includes('administrative_area_level_1')) {
+        state = component.short_name;
+      } else if (component.types.includes('country')) {
+        country = component.long_name;
+      }
+    });
+    
     return {
       success: true,
-      formattedAddress: `${latitude}, ${longitude}`,
-      city: '',
-      state: '',
-      country: '',
-      placeId: '',
+      placeId: data.results[0]?.place_id || '',
+      formattedAddress,
+      city,
+      state,
+      country,
+      fullAddress: formattedAddress,
     };
-    
   } catch (error) {
     console.error('Error getting location details:', error);
-    // Even on error, return basic coordinates as a fallback
+    // Return basic location info on error
     return {
       success: true,
       formattedAddress: `${latitude}, ${longitude}`,
@@ -88,49 +112,83 @@ export const getLocationDetails = async (latitude, longitude) => {
   }
 };
 
-// Search places
+// Search places with Google Places API
 export const searchPlaces = async (query) => {
-  // Return mock data
-  return {
-    success: true,
-    places: [
-      {
-        placeId: 'mock-place-1',
-        name: `${query} - Location 1`,
-        address: 'Mock address 1',
+  try {
+    // Construct the API URL with the Google Maps API key
+    const url = `${PLACES_API_URL}?query=${encodeURIComponent(query)}&key=${GOOGLE_MAPS_API_KEY}`;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (data.status !== 'OK') {
+      console.warn(`Places API error: ${data.status} - ${data.error_message || 'Unknown error'}`);
+      // Return empty results on error
+      return {
+        success: true,
+        places: [],
+      };
+    }
+    
+    return {
+      success: true,
+      places: data.results.map(place => ({
+        placeId: place.place_id,
+        name: place.name,
+        address: place.formatted_address,
         coords: {
-          latitude: 40.7128,
-          longitude: -74.0060,
+          latitude: place.geometry.location.lat,
+          longitude: place.geometry.location.lng,
         },
-      },
-      {
-        placeId: 'mock-place-2',
-        name: `${query} - Location 2`,
-        address: 'Mock address 2',
-        coords: {
-          latitude: 34.0522,
-          longitude: -118.2437,
-        },
-      },
-    ],
-  };
+      })),
+    };
+  } catch (error) {
+    console.error('Error searching places:', error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
 };
 
-// Get place details - simplified version
+// Get place details by placeId using Google Places API
 export const getPlaceDetails = async (placeId) => {
-  // Return mock data
-  return {
-    success: true,
-    details: {
-      placeId,
-      name: 'Location Detail',
-      address: '123 Mock Street, Anytown',
-      coords: {
-        latitude: 40.7128,
-        longitude: -74.0060,
+  try {
+    // Construct the API URL with the Google Maps API key
+    const url = `${PLACE_DETAILS_API_URL}?place_id=${placeId}&fields=name,formatted_address,geometry&key=${GOOGLE_MAPS_API_KEY}`;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (data.status !== 'OK') {
+      console.warn(`Place Details API error: ${data.status} - ${data.error_message || 'Unknown error'}`);
+      return {
+        success: false,
+        error: `Failed to get place details: ${data.status}`,
+      };
+    }
+    
+    const { result } = data;
+    
+    return {
+      success: true,
+      details: {
+        placeId,
+        name: result.name,
+        address: result.formatted_address,
+        coords: {
+          latitude: result.geometry.location.lat,
+          longitude: result.geometry.location.lng,
+        },
       },
-    },
-  };
+    };
+  } catch (error) {
+    console.error('Error getting place details:', error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
 };
 
 // Get distance between two coordinates in km
