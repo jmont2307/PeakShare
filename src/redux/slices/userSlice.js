@@ -38,42 +38,38 @@ export const fetchUserProfile = createAsyncThunk(
 
 export const updateUserProfile = createAsyncThunk(
   'user/updateUserProfile',
-  async (userData, { rejectWithValue }) => {
+  async ({ userId, userData }, { rejectWithValue }) => {
     try {
-      const { id, displayName, username, bio, location, profileImage } = userData;
+      const { displayName, username, bio, location, profileImageUrl, skiStats } = userData;
       
       const updateData = {};
       
       if (displayName) updateData.displayName = displayName;
       if (username) updateData.username = username;
       if (bio !== undefined) updateData.bio = bio;
-      if (location) updateData.location = location;
+      if (location !== undefined) updateData.location = location;
       
-      // Upload profile image if provided
-      if (profileImage && profileImage.uri) {
-        const storageRef = ref(storage, `profiles/${id}/${Date.now()}.jpg`);
-        
-        // Convert URI to blob
-        const response = await fetch(profileImage.uri);
-        const blob = await response.blob();
-        
-        // Upload to Firebase Storage
-        await uploadBytes(storageRef, blob);
-        
-        // Get download URL
-        updateData.profileImageUrl = await getDownloadURL(storageRef);
+      // Handle profile image URL (can be set or cleared)
+      if (profileImageUrl !== undefined) {
+        updateData.profileImageUrl = profileImageUrl;
+      }
+      
+      // Update skiing preferences if provided
+      if (skiStats) {
+        updateData.skiStats = skiStats;
       }
       
       updateData.updatedAt = serverTimestamp();
       
-      const userDocRef = doc(db, 'users', id);
+      const userDocRef = doc(db, 'users', userId);
       await updateDoc(userDocRef, updateData);
       
       return {
-        id,
+        id: userId,
         ...updateData
       };
     } catch (error) {
+      console.error('Error updating profile:', error);
       return rejectWithValue(error.message);
     }
   }
@@ -219,18 +215,18 @@ const generateMockUsers = (count) => {
                      'alpine_skier', 'backcountry_pro', 'snow_surfer', 'freestyle_king', 'mogul_queen'];
   const displayNames = ['Alex Johnson', 'Sam Smith', 'Jordan Lee', 'Taylor Kim', 'Morgan Chen',
                         'Riley Garcia', 'Casey Wong', 'Jamie Davis', 'Quinn Park', 'Avery Martinez'];
-  // Using default profile placeholders instead of specific images
+  // Using default profile placeholders with different initials
   const profileImages = [
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS'
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=AJ',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=SS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=JL',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=TK',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=MC',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=RG',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=CW',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=JD',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=QP',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=AM'
   ];
   
   const users = [];
@@ -275,11 +271,11 @@ const generateMockNotifications = (userId) => {
     'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=200&auto=format&fit=crop'
   ];
   const profileImages = [
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
-    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS'
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=AJ',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=SS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=JL',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=TK',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=MC'
   ];
   
   // Generate text based on notification type

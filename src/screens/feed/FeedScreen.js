@@ -73,10 +73,18 @@ const FeedScreen = ({ navigation }) => {
           <Ionicons name="chevron-down" size={18} color={theme.colors.deepBlue} />
         </TouchableOpacity>
         <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('NewPost')}>
-            <Ionicons name="add-circle-outline" size={26} color={theme.colors.midnight} />
+          <TouchableOpacity 
+            style={styles.iconButton} 
+            onPress={() => navigation.navigate('NewPost')}
+            accessibilityLabel="Create new post"
+          >
+            <Ionicons name="add-circle-outline" size={26} color={theme.colors.primary} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton} onPress={() => alert('Messages feature coming soon')}>
+          <TouchableOpacity 
+            style={styles.iconButton} 
+            onPress={() => alert('Messages feature coming soon')}
+            accessibilityLabel="Messages"
+          >
             <Ionicons name="paper-plane-outline" size={24} color={theme.colors.midnight} />
           </TouchableOpacity>
         </View>

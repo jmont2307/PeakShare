@@ -192,7 +192,11 @@ const NewPostScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Appbar.Header>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
+        <Appbar.BackAction 
+          onPress={() => navigation.goBack()} 
+          accessibilityLabel="Go Back"
+          color={theme.colors.primary}
+        />
         <Appbar.Content title="New Post" />
       </Appbar.Header>
       

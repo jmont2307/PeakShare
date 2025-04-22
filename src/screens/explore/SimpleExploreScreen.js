@@ -213,8 +213,9 @@ const SimpleExploreScreen = ({ navigation }) => {
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
+            accessibilityLabel="Go Back"
           >
-            <Ionicons name="arrow-back" size={24} color={theme.colors.midnight} />
+            <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
           </TouchableOpacity>
           <TextInput
             style={styles.searchInput}
@@ -227,8 +228,9 @@ const SimpleExploreScreen = ({ navigation }) => {
             <TouchableOpacity
               style={styles.clearButton}
               onPress={() => setSearchQuery('')}
+              accessibilityLabel="Clear search"
             >
-              <Ionicons name="close-circle" size={20} color={theme.colors.mountain} />
+              <Ionicons name="close-circle" size={20} color={theme.colors.primary} />
             </TouchableOpacity>
           )}
         </View>

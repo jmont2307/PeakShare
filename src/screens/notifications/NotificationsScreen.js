@@ -15,6 +15,7 @@ import {
   Divider,
   useTheme
 } from 'react-native-paper';
+import { theme } from '../../theme';
 import { useDispatch, useSelector } from 'react-redux';
 import { AuthContext } from '../../contexts/AuthContext';
 import { fetchNotifications, markNotificationAsRead } from '../../redux/slices/userSlice';
@@ -182,6 +183,11 @@ const NotificationsScreen = ({ navigation }) => {
   return (
     <View style={dynamicStyles.container}>
       <Appbar.Header>
+        <Appbar.BackAction 
+          onPress={() => navigation.goBack()} 
+          accessibilityLabel="Go Back"
+          color={theme.colors.primary}
+        />
         <Appbar.Content title="Notifications" />
       </Appbar.Header>
       

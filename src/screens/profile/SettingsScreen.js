@@ -84,7 +84,11 @@ const SettingsScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Appbar.Header>
-        <Appbar.BackAction onPress={handleBack} />
+        <Appbar.BackAction 
+          onPress={handleBack} 
+          accessibilityLabel="Go Back"
+          color={theme.colors.primary}
+        />
         <Appbar.Content title="Settings" />
       </Appbar.Header>
 
@@ -93,21 +97,24 @@ const SettingsScreen = ({ navigation }) => {
           <List.Subheader>Account</List.Subheader>
           <List.Item
             title="Edit Profile"
-            left={() => <List.Icon icon="account-edit" />}
-            right={() => <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />}
+            left={() => <List.Icon icon="account-edit" color={paperTheme.colors.primary} />}
+            right={() => <MaterialCommunityIcons name="chevron-right" size={24} color={paperTheme.colors.primary} />}
             onPress={() => navigation.navigate('EditProfile')}
+            accessibilityLabel="Edit your profile"
           />
           <List.Item
             title="Change Password"
-            left={() => <List.Icon icon="lock" />}
-            right={() => <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />}
+            left={() => <List.Icon icon="lock" color={paperTheme.colors.primary} />}
+            right={() => <MaterialCommunityIcons name="chevron-right" size={24} color={paperTheme.colors.primary} />}
             onPress={handleChangePassword}
+            accessibilityLabel="Change your password"
           />
           <List.Item
             title="Privacy Settings"
-            left={() => <List.Icon icon="shield-account" />}
-            right={() => <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />}
+            left={() => <List.Icon icon="shield-account" color={paperTheme.colors.primary} />}
+            right={() => <MaterialCommunityIcons name="chevron-right" size={24} color={paperTheme.colors.primary} />}
             onPress={() => Alert.alert('Coming Soon', 'This feature will be available in a future update.')}
+            accessibilityLabel="Manage privacy settings"
           />
         </List.Section>
 

@@ -294,9 +294,17 @@ const PostDetailScreen = ({ navigation, route }) => {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <Appbar.Header>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
+        <Appbar.BackAction 
+          onPress={() => navigation.goBack()} 
+          accessibilityLabel="Go Back"
+          color={theme.colors.primary}
+        />
         <Appbar.Content title="Post" />
-        <Appbar.Action icon="dots-vertical" onPress={() => {}} />
+        <Appbar.Action 
+          icon="dots-vertical" 
+          onPress={() => {}} 
+          accessibilityLabel="More Options"
+        />
       </Appbar.Header>
       
       <FlatList

@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchResortDetails } from '../../redux/slices/resortsSlice';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { format } from 'date-fns';
+import { theme } from '../../theme';
 
 const { width } = Dimensions.get('window');
 const POST_WIDTH = width / 3 - 4;
@@ -142,9 +143,18 @@ const ResortDetailScreen = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <Appbar.Header>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
+        <Appbar.BackAction 
+          onPress={() => navigation.goBack()} 
+          accessibilityLabel="Go Back"
+          color={theme.colors.primary}
+        />
         <Appbar.Content title={currentResort.name} />
-        <Appbar.Action icon="share-variant" onPress={() => {}} />
+        <Appbar.Action 
+          icon="share-variant" 
+          onPress={() => {}} 
+          accessibilityLabel="Share Resort"
+          color={theme.colors.primary}
+        />
       </Appbar.Header>
       
       <ScrollView style={styles.scrollView}>

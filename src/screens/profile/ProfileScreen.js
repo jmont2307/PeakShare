@@ -105,8 +105,17 @@ const ProfileScreen = ({ navigation }) => {
     <View style={styles.container}>
       <Appbar.Header>
         <Appbar.Content title="Profile" />
-        <Appbar.Action icon="cog" onPress={handleSettings} />
-        <Appbar.Action icon="logout" onPress={confirmLogout} />
+        <Appbar.Action 
+          icon="cog" 
+          onPress={handleSettings}
+          accessibilityLabel="Settings"
+          color={theme.colors.primary} 
+        />
+        <Appbar.Action 
+          icon="logout" 
+          onPress={confirmLogout}
+          accessibilityLabel="Log Out"
+        />
       </Appbar.Header>
       
       <ScrollView>

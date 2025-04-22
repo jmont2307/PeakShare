@@ -177,11 +177,18 @@ const EditProfileScreen = ({ navigation }) => {
         }
       };
       
-      await dispatch(updateUserProfile({ userId: user.uid, userData: updatedProfile }));
+      const result = await dispatch(updateUserProfile({ 
+        userId: user.uid, 
+        userData: updatedProfile 
+      }));
+      
+      if (result.error) {
+        throw new Error(result.error.message || 'Failed to update profile');
+      }
       
       Alert.alert(
-        'Success',
-        'Profile updated successfully',
+        'Profile Updated',
+        'Your profile has been updated successfully',
         [{ text: 'OK', onPress: () => navigation.goBack() }]
       );
     } catch (error) {
@@ -201,9 +208,19 @@ const EditProfileScreen = ({ navigation }) => {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
       <Appbar.Header>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
+        <Appbar.BackAction 
+          onPress={() => navigation.goBack()} 
+          accessibilityLabel="Go Back"
+          color={theme.colors.primary}
+        />
         <Appbar.Content title="Edit Profile" />
-        <Appbar.Action icon="check" onPress={handleSave} disabled={loading || uploadingImage} />
+        <Appbar.Action 
+          icon="check" 
+          onPress={handleSave} 
+          disabled={loading || uploadingImage}
+          accessibilityLabel="Save Changes"
+          color={theme.colors.primary}
+        />
       </Appbar.Header>
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
