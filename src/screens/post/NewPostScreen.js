@@ -102,11 +102,6 @@ const NewPostScreen = ({ navigation }) => {
   };
 
   const uploadPost = async () => {
-    if (!image) {
-      Alert.alert('Error', 'Please select an image');
-      return;
-    }
-    
     if (!caption) {
       Alert.alert('Error', 'Please add a caption');
       return;
@@ -121,27 +116,33 @@ const NewPostScreen = ({ navigation }) => {
     setUploadProgress(0);
     
     try {
-      // Upload image to Firebase Storage
-      const imageUri = image.uri;
-      const filename = imageUri.substring(imageUri.lastIndexOf('/') + 1);
-      const storageRef = ref(storage, `posts/${user.uid}/${filename}`);
+      let imageUrl = null;
       
-      // Convert URI to blob
-      const response = await fetch(imageUri);
-      const blob = await response.blob();
+      // Only upload an image if one is selected
+      if (image) {
+        // Upload image to Firebase Storage
+        const imageUri = image.uri;
+        const filename = imageUri.substring(imageUri.lastIndexOf('/') + 1);
+        const storageRef = ref(storage, `posts/${user.uid}/${filename}`);
+        
+        // Convert URI to blob
+        const response = await fetch(imageUri);
+        const blob = await response.blob();
+        
+        // Upload to Firebase Storage with progress monitoring
+        const uploadTask = uploadBytes(storageRef, blob);
+        
+        // Monitor upload progress
+        // Note: Web SDK doesn't support upload progress monitoring as cleanly as native SDK,
+        // but we'll set 50% progress immediately and 100% when done
+        setUploadProgress(0.5);
+        
+        await uploadTask;
+        
+        // Get download URL
+        imageUrl = await getDownloadURL(storageRef);
+      }
       
-      // Upload to Firebase Storage with progress monitoring
-      const uploadTask = uploadBytes(storageRef, blob);
-      
-      // Monitor upload progress
-      // Note: Web SDK doesn't support upload progress monitoring as cleanly as native SDK,
-      // but we'll set 50% progress immediately and 100% when done
-      setUploadProgress(0.5);
-      
-      await uploadTask;
-      
-      // Get download URL
-      const imageUrl = await getDownloadURL(storageRef);
       setUploadProgress(1.0);
       
       // Extract hashtags from caption
@@ -153,7 +154,8 @@ const NewPostScreen = ({ navigation }) => {
         userId: user.uid,
         username: userData.username,
         userProfileImageUrl: userData.profileImageUrl,
-        imageUrls: [imageUrl],
+        imageUrls: imageUrl ? [imageUrl] : [],
+        hasImage: !!imageUrl,
         caption,
         location,
         tags: hashtags.map(tag => tag.substring(1).toLowerCase()),
@@ -259,7 +261,7 @@ const NewPostScreen = ({ navigation }) => {
         <Button 
           mode="contained" 
           onPress={uploadPost}
-          disabled={!image || !caption || !location || uploading}
+          disabled={!caption || !location || uploading}
           loading={uploading}
           style={styles.postButton}
         >

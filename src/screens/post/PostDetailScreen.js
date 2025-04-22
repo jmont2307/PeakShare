@@ -307,12 +307,31 @@ const PostDetailScreen = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
             
-            {/* Post image */}
-            <Image
-              source={{ uri: post.imageUrls?.[0] }}
-              style={styles.postImage}
-              resizeMode="cover"
-            />
+            {/* Post image or text-only post */}
+            {post.imageUrls && post.imageUrls.length > 0 ? (
+              <Image
+                source={{ uri: post.imageUrls[0] }}
+                style={styles.postImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={styles.textOnlyPostContainer}>
+                <Text style={styles.textOnlyPostText}>{post.caption}</Text>
+                
+                {post.weather && (
+                  <View style={styles.textOnlyPostWeather}>
+                    <Ionicons 
+                      name={post.weather.conditions.toLowerCase().includes('snow') ? 'snow-outline' : 'sunny-outline'} 
+                      size={18} 
+                      color={theme.colors.primary} 
+                    />
+                    <Text style={styles.textOnlyPostWeatherText}>
+                      {post.weather.temperature}° • {post.weather.conditions}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
             
             {/* Post actions */}
             <View style={styles.actionsContainer}>
@@ -598,6 +617,34 @@ const styles = StyleSheet.create({
   },
   disabledButtonText: {
     opacity: 0.5,
+  },
+  // Text-only post styles
+  textOnlyPostContainer: {
+    padding: 24,
+    backgroundColor: theme.colors.surface,
+    minHeight: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: theme.colors.silver,
+  },
+  textOnlyPostText: {
+    fontSize: 20,
+    lineHeight: 28,
+    color: theme.colors.midnight,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  textOnlyPostWeather: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  textOnlyPostWeatherText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: theme.colors.primary,
   },
 });
 

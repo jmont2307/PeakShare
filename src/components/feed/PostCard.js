@@ -89,29 +89,50 @@ const PostCard = ({ post, onPress }) => {
         </TouchableOpacity>
       </View>
       
-      {/* Image */}
-      <TouchableOpacity activeOpacity={0.9} onPress={onPress}>
-        <View style={styles.imageContainer}>
-          <Image 
-            source={{ uri: post.imageUrls[0] }} 
-            style={styles.image}
-            resizeMode="cover"
-          />
-          
-          {post.weather && (
-            <View style={styles.weatherBadge}>
-              <Ionicons 
-                name={post.weather.conditions.toLowerCase().includes('snow') ? 'snow-outline' : 'sunny-outline'} 
-                size={16} 
-                color={theme.colors.snow} 
-                style={styles.weatherIcon}
-              />
-              <Text style={styles.temperature}>{post.weather.temperature}°</Text>
-              <Text style={styles.conditions}>{post.weather.conditions}</Text>
-            </View>
-          )}
-        </View>
-      </TouchableOpacity>
+      {/* Image (if exists) */}
+      {post.imageUrls && post.imageUrls.length > 0 ? (
+        <TouchableOpacity activeOpacity={0.9} onPress={onPress}>
+          <View style={styles.imageContainer}>
+            <Image 
+              source={{ uri: post.imageUrls[0] }} 
+              style={styles.image}
+              resizeMode="cover"
+            />
+            
+            {post.weather && (
+              <View style={styles.weatherBadge}>
+                <Ionicons 
+                  name={post.weather.conditions.toLowerCase().includes('snow') ? 'snow-outline' : 'sunny-outline'} 
+                  size={16} 
+                  color={theme.colors.snow} 
+                  style={styles.weatherIcon}
+                />
+                <Text style={styles.temperature}>{post.weather.temperature}°</Text>
+                <Text style={styles.conditions}>{post.weather.conditions}</Text>
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity activeOpacity={0.9} onPress={onPress}>
+          <View style={styles.textOnlyContainer}>
+            <Text style={styles.textOnlyCaption}>{post.caption}</Text>
+            
+            {post.weather && (
+              <View style={styles.textOnlyWeather}>
+                <Ionicons 
+                  name={post.weather.conditions.toLowerCase().includes('snow') ? 'snow-outline' : 'sunny-outline'} 
+                  size={18} 
+                  color={theme.colors.primary} 
+                />
+                <Text style={styles.textOnlyWeatherText}>
+                  {post.weather.temperature}° • {post.weather.conditions}
+                </Text>
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
+      )}
       
       {/* Actions */}
       <View style={styles.actionsContainer}>
@@ -282,6 +303,34 @@ const styles = StyleSheet.create({
     color: theme.colors.mountain,
     fontSize: 12,
     marginTop: 4,
+  },
+  // Styles for text-only posts
+  textOnlyContainer: {
+    padding: 16,
+    backgroundColor: theme.colors.surface,
+    minHeight: 120,
+    justifyContent: 'center',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: theme.colors.silver,
+  },
+  textOnlyCaption: {
+    fontSize: 18,
+    lineHeight: 24,
+    color: theme.colors.midnight,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  textOnlyWeather: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+  },
+  textOnlyWeatherText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: theme.colors.primary,
   },
 });
 
