@@ -71,18 +71,14 @@ This will open the application in your browser at http://localhost:3000
 
 ### Running in Production Mode
 
-1. Configure Firebase:
-   - Replace the Firebase configuration in `src/firebase.js` with your own configuration if needed:
+1. Configure environment variables:
+   - Create a `.env` file from the `.env.example` template
+   - Add your Firebase configuration and other environment variables
 
-```javascript
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
+```bash
+# Copy the example env file
+cp .env.example .env
+# Edit the .env file with your actual values
 ```
 
 2. Update Firebase security rules:
@@ -94,6 +90,22 @@ const firebaseConfig = {
 npm run build
 npm start
 ```
+
+### Deploying to Render
+
+1. Create a new Web Service on Render:
+   - Connect your GitHub repository
+   - Use the following settings:
+     - Build Command: `npm install && npm run build`
+     - Start Command: `node server.js`
+
+2. Add environment variables in the Render dashboard:
+   - Add all the Firebase configuration variables from your `.env` file
+   - Set `NODE_ENV` to `production`
+
+3. Deploy your application:
+   - Render will automatically build and deploy your application
+   - Your application will be available at your Render URL
 
 ### Running on Mobile
 

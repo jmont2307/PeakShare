@@ -1,7 +1,7 @@
 import * as Location from 'expo-location';
 import { Platform } from 'react-native';
 
-const GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY'; // Add your Google Maps API Key here
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyCk2VuTc5eIvNVLvte5x53mIIrLjomU6Ew';
 
 // Get current location permissions
 export const requestLocationPermissions = async () => {

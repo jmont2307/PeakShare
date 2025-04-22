@@ -4,9 +4,8 @@
  */
 import axios from 'axios';
 
-// OpenWeatherMap API key - this would normally be in an environment variable
-// Free tier key with limited usage
-const API_KEY = '9f2d8e174bd84d3bbad85021232401';
+// Weather API key from environment variables
+const API_KEY = process.env.WEATHER_API_KEY || '5a132a14eae24211b1c01327252502';
 
 export const fetchWeatherForLocation = async (latitude, longitude, resortName = '') => {
   try {
