@@ -21,6 +21,8 @@ module.exports = {
       'react-native$': 'react-native-web',
       '@env': path.resolve(__dirname, 'src/env.js'),
       '@react-native-async-storage/async-storage': path.resolve(__dirname, 'src/native-modules.js'),
+      // Add alias for TouchableOpacity to fix click issues
+      'react-native/Libraries/Components/Touchable/TouchableOpacity': 'react-native-web/dist/exports/TouchableOpacity',
     },
     fallback: {
       'path': require.resolve('path-browserify'),

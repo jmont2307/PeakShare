@@ -1,6 +1,10 @@
 // Enhanced web entry point for PeakShare
 import { AppRegistry } from 'react-native';
 import SimpleApp from './SimpleApp';
+import WebPolyfills from './web-polyfills';
+
+// Install web polyfills
+WebPolyfills.install();
 
 // Use constant app name instead of importing from app.json
 const APP_NAME = 'PeakShare';
