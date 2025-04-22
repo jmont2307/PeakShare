@@ -6,7 +6,9 @@ import * as Location from 'expo-location';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import locationService from '../services/locationService';
 
+
 import { GOOGLE_MAPS_API_KEY } from '@env';
+
 
 const LocationPicker = ({ 
   onLocationSelected, 

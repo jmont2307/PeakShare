@@ -1,10 +1,12 @@
 import * as Location from 'expo-location';
 import { GOOGLE_MAPS_API_KEY } from '@env';
 
+
 // Google Maps API endpoints
 const GEOCODING_API_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
 const PLACES_API_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
 const PLACE_DETAILS_API_URL = 'https://maps.googleapis.com/maps/api/place/details/json';
+
 
 // Get current location permissions
 export const requestLocationPermissions = async () => {

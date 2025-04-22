@@ -8,13 +8,13 @@ import { getAnalytics, isSupported } from 'firebase/analytics';
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later
 const firebaseConfig = {
-  apiKey: "AIzaSyCXa2Tbu1a-5qB-PIuUUPNF_kPLCqWk7yA",
-  authDomain: "peakshare-fe51b.firebaseapp.com",
-  projectId: "peakshare-fe51b",
-  storageBucket: "peakshare-fe51b.firebasestorage.app",
-  messagingSenderId: "65188809207",
-  appId: "1:65188809207:web:181339d40dcfe40a2946f2",
-  measurementId: "G-SBJHV1DBXJ"
+  apiKey: process.env.FIREBASE_API_KEY || "AIzaSyCXa2Tbu1a-5qB-PIuUUPNF_kPLCqWk7yA",
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN || "peakshare-fe51b.firebaseapp.com",
+  projectId: process.env.FIREBASE_PROJECT_ID || "peakshare-fe51b",
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "peakshare-fe51b.firebasestorage.app",
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || "65188809207",
+  appId: process.env.FIREBASE_APP_ID || "1:65188809207:web:181339d40dcfe40a2946f2",
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID || "G-SBJHV1DBXJ"
 };
 
 // Initialize Firebase

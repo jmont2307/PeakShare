@@ -2,8 +2,10 @@
 import axios from 'axios';
 import { WEATHER_API_KEY } from '@env';
 
+
 // WeatherAPI.com endpoint
 const WEATHER_API_BASE_URL = 'https://api.weatherapi.com/v1/current.json';
+
 
 /**
  * Fetch weather data for a location

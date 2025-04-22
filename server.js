@@ -2,9 +2,20 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3002;
+// Load environment variables from .env file in development
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
+const PORT = process.env.PORT || 3002;
 
 const server = http.createServer((req, res) => {
+  // Health check endpoint for Render
+  if (req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }));
+  }
+  
   // Default to index.html
   let filePath = path.join(__dirname, 'dist', req.url === '/' ? 'index.html' : req.url);
   
@@ -38,6 +49,7 @@ const server = http.createServer((req, res) => {
         });
       } else {
         // Server error
+        console.error(`Server Error: ${error.code}`);
         res.writeHead(500);
         res.end(`Server Error: ${error.code}`);
       }
