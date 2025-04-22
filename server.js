@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 // Load environment variables from .env file in development
 if (process.env.NODE_ENV !== 'production') {
@@ -17,12 +18,37 @@ if (!fs.existsSync(distDir)) {
 
 // Check if index.html exists in dist directory
 if (!fs.existsSync(path.join(distDir, 'index.html'))) {
-  // Try running webpack build
-  try {
-    console.log('Running webpack build...');
-    require('child_process').execSync('NODE_ENV=production npx webpack --mode production', { stdio: 'inherit' });
-  } catch (error) {
-    console.error('Webpack build failed, serving simple page instead');
+  console.log('No index.html found in dist directory');
+  
+  // Copy static.html from public directory if it exists
+  const staticHtmlPath = path.join(__dirname, 'public', 'static.html');
+  if (fs.existsSync(staticHtmlPath)) {
+    console.log('Copying static.html to dist/index.html');
+    fs.copyFileSync(staticHtmlPath, path.join(distDir, 'index.html'));
+  } else {
+    // Create a basic index.html
+    console.log('Creating basic index.html');
+    const basicHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <title>PeakShare</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 20px; text-align: center; }
+    h1 { color: #0066cc; }
+    .container { max-width: 800px; margin: 40px auto; padding: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>PeakShare</h1>
+    <p>Connect with ski enthusiasts worldwide</p>
+    <p>The application is running. API status can be checked at <a href="/api/health">/api/health</a></p>
+  </div>
+  <div id="root"></div>
+</body>
+</html>`;
+    fs.writeFileSync(path.join(distDir, 'index.html'), basicHtml);
   }
 }
 

@@ -32,6 +32,7 @@ const appDirectory = path.resolve(__dirname);
 
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
+  bail: false, // Don't fail on first error
   entry: {
     main: './src/index.web.js'
   },
