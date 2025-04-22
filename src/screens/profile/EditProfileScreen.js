@@ -29,6 +29,7 @@ import {
   getDownloadURL,
   deleteObject
 } from 'firebase/storage';
+import { theme } from '../../theme';
 
 const EditProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
