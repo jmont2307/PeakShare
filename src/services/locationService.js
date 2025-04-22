@@ -1,7 +1,12 @@
 import * as Location from 'expo-location';
-import { Platform } from 'react-native';
+import { GOOGLE_MAPS_API_KEY } from '@env';
 
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyCk2VuTc5eIvNVLvte5x53mIIrLjomU6Ew';
+
+// Google Maps API endpoints
+const GEOCODING_API_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
+const PLACES_API_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
+const PLACE_DETAILS_API_URL = 'https://maps.googleapis.com/maps/api/place/details/json';
+
 
 // Get current location permissions
 export const requestLocationPermissions = async () => {
@@ -46,17 +51,26 @@ export const getCurrentLocation = async () => {
   }
 };
 
-// Get location details from coordinates
+// Get location details from coordinates using Google Maps Geocoding API
 export const getLocationDetails = async (latitude, longitude) => {
   try {
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`
-    );
+    // Construct the API URL with the Google Maps API key
+    const url = `${GEOCODING_API_URL}?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
     
+    const response = await fetch(url);
     const data = await response.json();
     
     if (data.status !== 'OK') {
-      throw new Error(`Geocoding failed: ${data.status}`);
+      console.warn(`Geocoding API error: ${data.status} - ${data.error_message || 'Unknown error'}`);
+      // Return basic location info on error
+      return {
+        success: true,
+        formattedAddress: `${latitude}, ${longitude}`,
+        city: '',
+        state: '',
+        country: '',
+        placeId: '',
+      };
     }
     
     // Extract relevant address components
@@ -88,9 +102,14 @@ export const getLocationDetails = async (latitude, longitude) => {
     };
   } catch (error) {
     console.error('Error getting location details:', error);
+    // Return basic location info on error
     return {
-      success: false,
-      error: error.message,
+      success: true,
+      formattedAddress: `${latitude}, ${longitude}`,
+      city: '',
+      state: '',
+      country: '',
+      placeId: '',
     };
   }
 };
@@ -98,16 +117,19 @@ export const getLocationDetails = async (latitude, longitude) => {
 // Search places with Google Places API
 export const searchPlaces = async (query) => {
   try {
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
-        query
-      )}&key=${GOOGLE_MAPS_API_KEY}`
-    );
+    // Construct the API URL with the Google Maps API key
+    const url = `${PLACES_API_URL}?query=${encodeURIComponent(query)}&key=${GOOGLE_MAPS_API_KEY}`;
     
+    const response = await fetch(url);
     const data = await response.json();
     
     if (data.status !== 'OK') {
-      throw new Error(`Place search failed: ${data.status}`);
+      console.warn(`Places API error: ${data.status} - ${data.error_message || 'Unknown error'}`);
+      // Return empty results on error
+      return {
+        success: true,
+        places: [],
+      };
     }
     
     return {
@@ -131,17 +153,21 @@ export const searchPlaces = async (query) => {
   }
 };
 
-// Get place details by placeId
+// Get place details by placeId using Google Places API
 export const getPlaceDetails = async (placeId) => {
   try {
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,formatted_address,geometry&key=${GOOGLE_MAPS_API_KEY}`
-    );
+    // Construct the API URL with the Google Maps API key
+    const url = `${PLACE_DETAILS_API_URL}?place_id=${placeId}&fields=name,formatted_address,geometry&key=${GOOGLE_MAPS_API_KEY}`;
     
+    const response = await fetch(url);
     const data = await response.json();
     
     if (data.status !== 'OK') {
-      throw new Error(`Place details failed: ${data.status}`);
+      console.warn(`Place Details API error: ${data.status} - ${data.error_message || 'Unknown error'}`);
+      return {
+        success: false,
+        error: `Failed to get place details: ${data.status}`,
+      };
     }
     
     const { result } = data;

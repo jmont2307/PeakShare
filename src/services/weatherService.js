@@ -1,18 +1,25 @@
-/**
- * Weather service for the PeakShare app
- * Uses OpenWeatherMap API for real weather data with fallback to mock data
- */
+
 import axios from 'axios';
+import { WEATHER_API_KEY } from '@env';
 
-// Weather API key from environment variables
-const API_KEY = process.env.WEATHER_API_KEY || '5a132a14eae24211b1c01327252502';
 
+// WeatherAPI.com endpoint
+const WEATHER_API_BASE_URL = 'https://api.weatherapi.com/v1/current.json';
+
+
+/**
+ * Fetch weather data for a location
+ * @param {number} latitude - Location latitude
+ * @param {number} longitude - Location longitude
+ * @param {string} resortName - Optional resort name to improve ski detection
+ * @returns {Promise<Object>} - Weather data object
+ */
 export const fetchWeatherForLocation = async (latitude, longitude, resortName = '') => {
   try {
-    // First try to get real weather data from OpenWeatherMap API
-    // We're using the free WeatherAPI.com service as an alternative
-    const apiUrl = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${latitude},${longitude}&days=1`;
+    // Construct the API URL with the API key from environment variables
+    const apiUrl = `${WEATHER_API_BASE_URL}?key=${WEATHER_API_KEY}&q=${latitude},${longitude}&days=1`;
     
+    // Make the API request
     const response = await axios.get(apiUrl);
     
     if (response.data) {
@@ -33,7 +40,6 @@ export const fetchWeatherForLocation = async (latitude, longitude, resortName = 
         }
         
         // Estimate snow depth based on recent conditions
-        // This is very rough and would be better with actual data
         if (forecast?.day?.totalsnow_cm) {
           snowDepth = forecast.day.totalsnow_cm;
         } else {
@@ -54,12 +60,12 @@ export const fetchWeatherForLocation = async (latitude, longitude, resortName = 
         snowfall: Math.round(snowfall),
         snowDepth: Math.round(snowDepth),
         powderRating,
-        lastUpdated: current.last_updated_epoch ? new Date(current.last_updated_epoch * 1000).toISOString() : new Date().toISOString()
+        lastUpdated: current.last_updated
       };
-    } else {
-      // If API call succeeds but with no data, fall back to mock data
-      return generateMockWeatherData(latitude, longitude, resortName);
     }
+    
+    // If API call was successful but without expected data, fall back to mock data
+    return generateMockWeatherData(latitude, longitude, resortName);
   } catch (error) {
     console.error('Error fetching weather data:', error);
     // Fall back to mock data if API call fails
@@ -69,6 +75,10 @@ export const fetchWeatherForLocation = async (latitude, longitude, resortName = 
 
 /**
  * Helper function to generate mock weather data as a fallback
+ * @param {number} latitude - Location latitude
+ * @param {number} longitude - Location longitude
+ * @param {string} resortName - Resort name if available
+ * @returns {Object} - Mock weather data
  */
 function generateMockWeatherData(latitude, longitude, resortName) {
   const isWinterSeason = isSki(latitude, longitude, resortName);
@@ -118,6 +128,10 @@ function generateMockWeatherData(latitude, longitude, resortName) {
 /**
  * Helper function to determine if a location is likely a ski resort
  * Uses resort name and location data to make a determination
+ * @param {number} latitude - Location latitude
+ * @param {number} longitude - Location longitude
+ * @param {string} resortName - Resort name if available
+ * @returns {boolean} - True if likely a ski location
  */
 function isSki(latitude, longitude, resortName = '') {
   // Check for ski-related terms in the resort name
@@ -141,12 +155,30 @@ function isSki(latitude, longitude, resortName = '') {
     return true;
   }
   
-  // Fallback - 70% chance it's a ski location for testing purposes
-  return Math.random() > 0.3;
+  // Check for known ski regions by longitude/latitude combinations
+  // Rocky Mountains
+  if ((latitude > 35 && latitude < 50) && (longitude > -125 && longitude < -105)) {
+    return true;
+  }
+  // Alps
+  if ((latitude > 43 && latitude < 48) && (longitude > 5 && longitude < 16)) {
+    return true;
+  }
+  // Japan ski regions
+  if ((latitude > 35 && latitude < 45) && (longitude > 135 && longitude < 145)) {
+    return true;
+  }
+  
+  // Fallback - 50% chance it's a ski location for testing purposes
+  return Math.random() > 0.5;
 }
 
 /**
  * Calculate a "powder quality" rating (1-10) based on weather conditions
+ * @param {number} snowfall - Recent snowfall in cm
+ * @param {number} temperature - Temperature in °C
+ * @param {number} windSpeed - Wind speed in km/h
+ * @returns {number} - Powder quality rating (1-10)
  */
 function calculatePowderRating(snowfall, temperature, windSpeed) {
   // Start with base rating from recent snowfall
@@ -165,3 +197,7 @@ function calculatePowderRating(snowfall, temperature, windSpeed) {
   // Ensure the rating is between 1-10
   return Math.max(1, Math.min(10, Math.round(rating)));
 }
+
+export default {
+  fetchWeatherForLocation
+};
