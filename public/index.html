@@ -8,31 +8,51 @@
   <meta name="format-detection" content="telephone=no" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>PeakShare</title>
   <style>
-    body {
+    * {
+      -webkit-tap-highlight-color: transparent;
+      outline: none !important;
+    }
+    
+    html, body {
       margin: 0;
       padding: 0;
+      height: 100%;
+      width: 100%;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
         'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
         sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      overscroll-behavior-y: none;
+      overscroll-behavior: none;
       touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
+      -webkit-overflow-scrolling: touch;
+      overflow: auto;
     }
     
     #root {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      touch-action: manipulation;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
     }
     
-    button, a, [role="button"] {
-      cursor: pointer;
-      touch-action: manipulation;
+    button, 
+    a, 
+    [role="button"],
+    .touchable,
+    [data-testid],
+    [class*="touchable"], 
+    [class*="button"],
+    [class*="pressable"] {
+      cursor: pointer !important;
+      touch-action: manipulation !important;
     }
     
     /* Loading state while JS loads */
@@ -41,7 +61,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      height: 100%;
       background-color: #f8f9fa;
       color: #333;
       text-align: center;
@@ -67,6 +87,19 @@
       to { transform: rotate(360deg); }
     }
   </style>
+  <script>
+    // Prevent default touch behavior
+    document.addEventListener('touchmove', function(e) {
+      if(!e.target.classList.contains('scrollable')) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+    
+    // Disable double-tap to zoom
+    document.addEventListener('touchend', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+  </script>
 </head>
 <body>
   <div id="root">
