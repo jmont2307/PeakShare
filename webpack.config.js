@@ -33,7 +33,7 @@ const appDirectory = path.resolve(__dirname);
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   entry: {
-    main: './src/empty.js'
+    main: './src/index.web.js'
   },
   output: {
     path: path.resolve(appDirectory, 'dist'),
@@ -41,7 +41,25 @@ module.exports = {
     filename: 'bundle.js',
   },
   module: {
-    rules: []
+    rules: [
+      // Process JS with Babel
+      {
+        test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env', '@babel/preset-react'],
+            plugins: ['react-native-web'],
+          },
+        },
+      },
+      // Handle image assets
+      {
+        test: /\.(gif|jpe?g|png|svg)$/,
+        type: 'asset',
+      },
+    ]
   },
   resolve: {
     extensions: ['.web.js', '.js', '.jsx'],

@@ -9,31 +9,40 @@ if (process.env.NODE_ENV !== 'production') {
 
 const PORT = process.env.PORT || 3002;
 
-// Load our build script if needed
-if (!fs.existsSync(path.join(__dirname, 'dist', 'index.html'))) {
-  console.log('No index.html found, running build script...');
-  require('./build');
+// Ensure the dist directory exists
+const distDir = path.join(__dirname, 'dist');
+if (!fs.existsSync(distDir)) {
+  fs.mkdirSync(distDir, { recursive: true });
+}
+
+// Check if index.html exists in dist directory
+if (!fs.existsSync(path.join(distDir, 'index.html'))) {
+  // Try running webpack build
+  try {
+    console.log('Running webpack build...');
+    require('child_process').execSync('NODE_ENV=production npx webpack --mode production', { stdio: 'inherit' });
+  } catch (error) {
+    console.error('Webpack build failed, serving simple page instead');
+  }
 }
 
 const server = http.createServer((req, res) => {
-  // Health check endpoints for Render
+  // Health check endpoints
   if (req.url === '/health' || req.url === '/api/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ 
       status: 'ok', 
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development',
-      memory: process.memoryUsage(),
-      uptime: process.uptime()
+      environment: process.env.NODE_ENV || 'development'
     }));
   }
   
-  // Default to static.html for the root path
+  // Determine the file path based on the URL
   let filePath;
   if (req.url === '/') {
-    filePath = path.join(__dirname, 'public', 'static.html');
+    filePath = path.join(distDir, 'index.html');
   } else {
-    filePath = path.join(__dirname, 'dist', req.url);
+    filePath = path.join(distDir, req.url);
   }
   
   // Get the file extension
@@ -50,6 +59,7 @@ const server = http.createServer((req, res) => {
     '.jpeg': 'image/jpeg',
     '.gif': 'image/gif',
     '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon'
   };
 
   // Set content type header
@@ -59,16 +69,23 @@ const server = http.createServer((req, res) => {
   fs.readFile(filePath, (error, content) => {
     if (error) {
       if(error.code === 'ENOENT') {
-        // Always serve the static HTML for any route not found
-        fs.readFile(path.join(__dirname, 'public', 'static.html'), (err, content) => {
-          if (err) {
-            res.writeHead(500);
-            res.end('Server Error: Could not load static HTML');
-            return;
-          }
-          res.writeHead(200, { 'Content-Type': 'text/html' });
-          res.end(content, 'utf-8');
-        });
+        // Client-side routing - serve index.html for paths that don't exist but look like routes
+        if (!extname && !req.url.includes('.')) {
+          fs.readFile(path.join(distDir, 'index.html'), (err, content) => {
+            if (err) {
+              res.writeHead(500);
+              res.end('Server Error: Could not load index.html');
+              return;
+            }
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.end(content, 'utf-8');
+          });
+          return;
+        }
+        
+        // File not found - 404
+        res.writeHead(404);
+        res.end('404 Not Found: ' + req.url);
       } else {
         // Server error
         console.error(`Server Error: ${error.code}`);
