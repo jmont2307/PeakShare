@@ -32,11 +32,23 @@ module.exports = {
     rules: [
       {
         test: /\.jsx?$/,
-        exclude: /node_modules(?!\/(@expo\/vector-icons|react-native-vector-icons|react-native-ratings|react-native-google-places-autocomplete|expo-linear-gradient)).*$/,
+        exclude: /node_modules(?!\/(@expo\/vector-icons|react-native-vector-icons|react-native-ratings|react-native-google-places-autocomplete|expo-linear-gradient|@react-native)).*$/,
         use: {
           loader: 'babel-loader',
           options: {
             presets: ['@babel/preset-env', '@babel/preset-react'],
+            plugins: ['react-native-web']
+          }
+        }
+      },
+      // Handle TypeScript files
+      {
+        test: /\.tsx?$/,
+        exclude: /node_modules(?!\/(@react-native|expo|@expo)).*$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript', '@babel/preset-flow'],
             plugins: ['react-native-web']
           }
         }
@@ -65,23 +77,31 @@ module.exports = {
           }
         ]
       },
-      // Handle JSX in node_modules
+      // Handle JS files in node_modules that contain JSX or TypeScript or Flow
       {
-        test: /\.jsx?$/,
+        test: /\.(js|jsx|ts|tsx)$/,
         include: [
           /node_modules\/@expo\/vector-icons/,
           /node_modules\/expo-linear-gradient/,
           /node_modules\/react-native-vector-icons/,
           /node_modules\/react-native-google-places-autocomplete/,
           /node_modules\/react-native-ratings/,
+          /node_modules\/@react-native/,
+          /node_modules\/expo-asset/,
+          /node_modules\/expo-font/,
         ],
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env', '@babel/preset-react'],
+            presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-flow'],
             plugins: ['react-native-web']
           }
         }
+      },
+      // Handle TypeScript declaration files
+      {
+        test: /\.d\.ts$/,
+        loader: 'ignore-loader'
       }
     ]
   },
@@ -110,7 +130,8 @@ module.exports = {
     }),
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'assets', to: 'assets' }
+        { from: 'assets', to: 'assets' },
+        { from: 'public/robots.txt', to: 'robots.txt' }
       ]
     }),
     // Fix native modules

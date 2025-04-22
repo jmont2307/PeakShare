@@ -98,14 +98,32 @@ npm start
    - Use the following settings:
      - Build Command: `npm install && npm run build`
      - Start Command: `node server.js`
+     - Environment: Node
+     - Health Check Path: `/api/health`
 
-2. Add environment variables in the Render dashboard:
-   - Add all the Firebase configuration variables from your `.env` file
+2. Add environment variables in the Render dashboard or use render.yaml:
+   - Add all the Firebase configuration variables:
+     - FIREBASE_API_KEY
+     - FIREBASE_AUTH_DOMAIN
+     - FIREBASE_PROJECT_ID
+     - FIREBASE_STORAGE_BUCKET
+     - FIREBASE_MESSAGING_SENDER_ID
+     - FIREBASE_APP_ID
+     - FIREBASE_MEASUREMENT_ID
+   - Add API keys:
+     - GOOGLE_MAPS_API_KEY
+     - WEATHER_API_KEY
    - Set `NODE_ENV` to `production`
 
 3. Deploy your application:
    - Render will automatically build and deploy your application
    - Your application will be available at your Render URL
+   
+4. Troubleshooting:
+   - If you encounter TypeScript-related errors, ensure you have the following dependencies:
+     - @babel/preset-typescript
+     - @babel/preset-flow
+     - ignore-loader (for .d.ts files)
 
 ### Running on Mobile
 
