@@ -9,6 +9,12 @@ if (process.env.NODE_ENV !== 'production') {
 
 const PORT = process.env.PORT || 3002;
 
+// Load our build script if needed
+if (!fs.existsSync(path.join(__dirname, 'dist', 'index.html'))) {
+  console.log('No index.html found, running build script...');
+  require('./build');
+}
+
 const server = http.createServer((req, res) => {
   // Health check endpoint for Render
   if (req.url === '/health') {

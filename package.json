@@ -1,9 +1,9 @@
 {
   "name": "peakshare",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node index.js",
     "dev": "webpack serve --mode development --open",
     "build": "node build.js",
     "web": "npm run dev",

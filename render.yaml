@@ -3,7 +3,7 @@ services:
     name: peakshare
     env: node
     buildCommand: npm install && npm run build
-    startCommand: node server.js
+    startCommand: node index.js
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
