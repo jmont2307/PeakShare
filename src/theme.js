@@ -1,4 +1,4 @@
-import { DefaultTheme, DarkTheme as PaperDarkTheme } from 'react-native-paper';
+import { DefaultTheme, MD3DarkTheme as PaperDarkTheme } from 'react-native-paper';
 import { DefaultTheme as NavigationDefaultTheme, DarkTheme as NavigationDarkTheme } from '@react-navigation/native';
 
 // Light theme

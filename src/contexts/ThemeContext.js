@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AsyncStorage } from '../native-modules';
 import { LightTheme, DarkTheme } from '../theme';
 
 // Create a context to manage the theme state

@@ -22,7 +22,7 @@ import { Provider as PaperProvider, DefaultTheme, DarkTheme } from 'react-native
 // Using React Native's StatusBar instead of Expo's
 import { StatusBar } from 'react-native';
 import LinearGradient from 'react-native-web-linear-gradient';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AsyncStorage } from './src/native-modules';
 
 // No need to import here, it's imported in index.js
 import { theme as lightTheme } from './src/theme';

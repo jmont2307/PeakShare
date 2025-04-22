@@ -160,6 +160,94 @@ export const fetchNotifications = createAsyncThunk(
   }
 );
 
+// Fetch user followers
+export const fetchUserFollowers = createAsyncThunk(
+  'user/fetchUserFollowers',
+  async (userId, { getState, rejectWithValue }) => {
+    try {
+      // In a real app, this would query Firestore for followers
+      // For this mock implementation, generate fake followers
+      return generateMockUsers(5);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Fetch user following
+export const fetchUserFollowing = createAsyncThunk(
+  'user/fetchUserFollowing',
+  async (userId, { getState, rejectWithValue }) => {
+    try {
+      // In a real app, this would query Firestore for following users
+      // For this mock implementation, generate fake following users
+      return generateMockUsers(8);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Unfollow user - for compatibility with existing code
+export const unfollowUser = createAsyncThunk(
+  'user/unfollowUser',
+  async (targetUserId, { getState, rejectWithValue }) => {
+    try {
+      const { user } = getState();
+      const currentUser = user.userData;
+      
+      if (!currentUser || !currentUser.uid) {
+        return rejectWithValue('User not authenticated');
+      }
+      
+      // In a real app, this would use Firestore to remove the follow relationship
+      // Since we have a toggleable followUser that handles both follow/unfollow,
+      // this function serves as a direct call to unfollow for UI consistency
+      return { 
+        following: false, 
+        targetUserId 
+      };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Helper to generate mock users for testing
+const generateMockUsers = (count) => {
+  const usernames = ['powder_hound', 'mountain_master', 'ski_guru', 'snow_rider', 'peak_explorer', 
+                     'alpine_skier', 'backcountry_pro', 'snow_surfer', 'freestyle_king', 'mogul_queen'];
+  const displayNames = ['Alex Johnson', 'Sam Smith', 'Jordan Lee', 'Taylor Kim', 'Morgan Chen',
+                        'Riley Garcia', 'Casey Wong', 'Jamie Davis', 'Quinn Park', 'Avery Martinez'];
+  const profileImages = [
+    'https://images.unsplash.com/photo-1600486913747-55e5470d6f40?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=200&auto=format&fit=crop'
+  ];
+  
+  const users = [];
+  for (let i = 0; i < count; i++) {
+    const userIndex = Math.floor(Math.random() * usernames.length);
+    users.push({
+      id: `user-${i}`,
+      username: usernames[userIndex],
+      displayName: displayNames[userIndex],
+      profileImageUrl: profileImages[userIndex],
+      bio: `Skiing enthusiast. ${Math.floor(Math.random() * 10) + 1} years experience.`,
+      isFollowedByMe: Math.random() > 0.3, // 70% chance the user is followed
+    });
+  }
+  
+  return users;
+};
+
 // Mark notification as read
 export const markNotificationAsRead = createAsyncThunk(
   'user/markNotificationAsRead',
@@ -255,7 +343,9 @@ const userSlice = createSlice({
     followStatus: {},
     updatingProfile: false,
     notifications: [],
-    notificationsLoading: false
+    notificationsLoading: false,
+    followers: [],
+    following: []
   },
   reducers: {
     setUserData: (state, action) => {
@@ -338,6 +428,21 @@ const userSlice = createSlice({
         state.followStatus[targetUserId] = following;
       })
       
+      // Unfollow user
+      .addCase(unfollowUser.fulfilled, (state, action) => {
+        const { following, targetUserId } = action.payload;
+        state.followStatus[targetUserId] = following;
+        
+        // Update follower/following counts if profile is loaded
+        if (state.profileData && state.profileData.id === targetUserId) {
+          state.profileData.followerCount = (state.profileData.followerCount || 1) - 1;
+        }
+        
+        if (state.userData) {
+          state.userData.followingCount = (state.userData.followingCount || 1) - 1;
+        }
+      })
+      
       // Fetch notifications
       .addCase(fetchNotifications.pending, (state) => {
         state.notificationsLoading = true;
@@ -359,6 +464,34 @@ const userSlice = createSlice({
         if (notification) {
           notification.unread = false;
         }
+      })
+      
+      // Fetch followers
+      .addCase(fetchUserFollowers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserFollowers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.followers = action.payload;
+      })
+      .addCase(fetchUserFollowers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Fetch following
+      .addCase(fetchUserFollowing.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserFollowing.fulfilled, (state, action) => {
+        state.loading = false;
+        state.following = action.payload;
+      })
+      .addCase(fetchUserFollowing.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

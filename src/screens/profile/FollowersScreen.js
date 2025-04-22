@@ -91,7 +91,7 @@ const FollowersScreen = ({ navigation, route }) => {
   };
 
   const handleFollow = (followUserId) => {
-    dispatch(followUser(followUserId));
+    dispatch(followUser({ userId: user.uid, targetUserId: followUserId }));
   };
 
   const handleUnfollow = (unfollowUserId) => {
