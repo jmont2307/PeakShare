@@ -1,36 +1,29 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, TextInput, Alert, ImageBackground, ActivityIndicator } from 'react-native';
-import LinearGradient from 'react-native-web-linear-gradient';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { Provider as PaperProvider } from 'react-native-paper';
+import { Provider as ReduxProvider } from 'react-redux';
 
-// For web localStorage implementation
-const localStorageAvailable = typeof window !== 'undefined' && window.localStorage;
+import { theme } from './theme';
+import { store } from './redux/store';
+import { AuthProvider } from './contexts/AuthContext';
+import AppNavigator from './navigation/AppNavigator';
 
-// SVG Mountain Background Component
-const MountainBackground = () => (
-  <View style={styles.mountainBackground}>
-    <View style={styles.mountain1} />
-    <View style={styles.mountain2} />
-    <View style={styles.mountain3} />
-  </View>
-);
+// Main SimpleApp component that sets up providers and navigation
+const SimpleApp = () => {
+  return (
+    <ReduxProvider store={store}>
+      <AuthProvider>
+        <PaperProvider theme={theme}>
+          <NavigationContainer>
+            <AppNavigator />
+          </NavigationContainer>
+        </PaperProvider>
+      </AuthProvider>
+    </ReduxProvider>
+  );
+};
 
-// Sample data for resorts
-const SAMPLE_RESORTS = [
-  // Colorado Resorts
-  {
-    id: 'co1',
-    name: 'Arapahoe Basin',
-    location: 'Colorado, USA',
-    imageUrl: 'https://images.unsplash.com/photo-1548802576-2e5fe216f802?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    rating: 4.7,
-    newSnow: 8,
-    description: 'Legendary status, underpriced, conveniently located, snow totals above average for Colorado.',
-    weather: {
-      temperature: -3,
-      conditions: 'Partly Cloudy',
-      snowDepth: 85
-    }
-  },
+export default SimpleApp;
   {
     id: 'co2',
     name: 'Aspen Mountain',

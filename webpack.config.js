@@ -72,7 +72,7 @@ module.exports = {
         publicPath: '/assets',
       }
     ],
-    port: 3001,
+    port: 3002,
     hot: true,
     historyApiFallback: true,
     open: true,

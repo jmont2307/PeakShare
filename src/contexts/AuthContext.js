@@ -32,62 +32,57 @@ export const AuthProvider = ({ children }) => {
 
   // Handle user state changes
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, async (userState) => {
-      if (userState) {
-        // User is signed in
-        const userDocRef = doc(db, 'users', userState.uid);
-        const userDoc = await getDoc(userDocRef);
-        
-        if (userDoc.exists()) {
-          const userDocData = userDoc.data();
-          setLocalUserData(userDocData);
-          
-          // Save user data to Redux
-          dispatch(setUserData({
-            uid: userState.uid,
-            ...userDocData
-          }));
-          
-          // Note: FCM token handling is removed as we're not using push notifications in this version
-          // This would require additional setup with Expo or the native Firebase SDK
-        } else {
-          // User document doesn't exist (shouldn't happen, but handle just in case)
-          console.log('User document not found for authenticated user');
-        }
-        
-        setUser(userState);
-      } else {
-        // User is signed out
-        setUser(null);
-        setLocalUserData(null);
-        dispatch(clearUserData());
-      }
-      
-      setLoading(false);
-    });
-
-    return unsubscribeAuth;
+    // Always set user to null to force login screen
+    setUser(null);
+    setLocalUserData(null);
+    dispatch(clearUserData());
+    setLoading(false);
+    
+    // In a real app, this would check Firebase auth state
+    return () => {}; 
   }, [dispatch]);
 
   const login = async (email, password) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      return { success: true };
-    } catch (error) {
-      let errorMessage = error.message;
-      
-      // Provide more user-friendly error messages
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-        errorMessage = 'Invalid email or password. Please try again.';
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Please enter a valid email address.';
-      } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = 'Too many failed login attempts. Please try again later.';
+      // For testing: allow any email/password
+      if (email && password) {
+        // Simulate successful login
+        const mockUser = {
+          uid: 'test-user-123',
+          email: email,
+          displayName: 'Test User',
+        };
+        
+        setUser(mockUser);
+        
+        // Create mock user data
+        const mockUserData = {
+          uid: 'test-user-123',
+          email: email,
+          username: 'testuser',
+          displayName: 'Test User',
+          profileImageUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=60',
+          bio: 'Test user account',
+          location: 'Test Location',
+          postCount: 5,
+          followerCount: 120,
+          followingCount: 45,
+        };
+        
+        setLocalUserData(mockUserData);
+        dispatch(setUserData(mockUserData));
+        
+        return { success: true };
+      } else {
+        return {
+          success: false,
+          error: 'Please enter both email and password.'
+        };
       }
-      
+    } catch (error) {
       return {
         success: false,
-        error: errorMessage
+        error: 'An error occurred while logging in.'
       };
     }
   };
