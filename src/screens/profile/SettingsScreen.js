@@ -15,19 +15,22 @@ import {
   Dialog,
   Portal,
   Button,
-  Paragraph
+  Paragraph,
+  useTheme
 } from 'react-native-paper';
 import { AuthContext } from '../../contexts/AuthContext';
+import { ThemeContext } from '../../contexts/ThemeContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useDispatch } from 'react-redux';
 
 const SettingsScreen = ({ navigation }) => {
   const { logout } = useContext(AuthContext);
+  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
+  const paperTheme = useTheme();
   const dispatch = useDispatch();
   
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
-  const [darkModeEnabled, setDarkModeEnabled] = useState(false);
   const [logoutDialogVisible, setLogoutDialogVisible] = useState(false);
   const [deleteAccountDialogVisible, setDeleteAccountDialogVisible] = useState(false);
 
@@ -46,8 +49,7 @@ const SettingsScreen = ({ navigation }) => {
   };
 
   const toggleDarkMode = () => {
-    setDarkModeEnabled(!darkModeEnabled);
-    // TODO: Implement dark mode theme switching
+    toggleTheme(); // Use the toggleTheme function from ThemeContext
   };
 
   const handleChangePassword = () => {
@@ -75,6 +77,9 @@ const SettingsScreen = ({ navigation }) => {
       Alert.alert('Logout Failed', error.message);
     }
   };
+
+  // Get styles with current theme
+  const styles = getStyles(paperTheme);
 
   return (
     <View style={styles.container}>
@@ -140,9 +145,9 @@ const SettingsScreen = ({ navigation }) => {
             left={() => <List.Icon icon="weather-night" />}
             right={() => (
               <Switch
-                value={darkModeEnabled}
+                value={isDarkMode}
                 onValueChange={toggleDarkMode}
-                color="#0066CC"
+                color={paperTheme.colors.primary}
               />
             )}
           />
@@ -219,17 +224,18 @@ const SettingsScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+// Make the styles function to utilize theme colors
+const getStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.background,
   },
   actionButtonsContainer: {
     padding: 16,
     marginBottom: 32,
   },
   logoutButton: {
-    backgroundColor: '#0066CC',
+    backgroundColor: theme.colors.primary,
     borderRadius: 8,
     padding: 12,
     alignItems: 'center',
@@ -237,18 +243,18 @@ const styles = StyleSheet.create({
   },
   deleteAccountButton: {
     borderWidth: 1,
-    borderColor: '#FF0000',
+    borderColor: theme.colors.error,
     borderRadius: 8,
     padding: 12,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: theme.colors.background,
     fontSize: 16,
     fontWeight: 'bold',
   },
   deleteButtonText: {
-    color: '#FF0000',
+    color: theme.colors.error,
     fontSize: 16,
     fontWeight: 'bold',
   },
