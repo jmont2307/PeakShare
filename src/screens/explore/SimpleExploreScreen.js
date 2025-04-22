@@ -160,7 +160,7 @@ const SimpleExploreScreen = ({ navigation }) => {
             )}
             {weather && (
               <View style={styles.statItem}>
-                <Text style={styles.statValue}>{weather.temperature}°C</Text>
+                <Text style={styles.statValue}>{weather.temperature}°C / {weather.temperatureF}°F</Text>
                 <Text style={styles.statLabel}>{weather.conditions}</Text>
               </View>
             )}

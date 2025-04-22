@@ -158,8 +158,8 @@ const EditProfileScreen = ({ navigation }) => {
       if (profileImage) {
         imageUrl = await uploadImage();
       }
-      // If profileImageUrl is empty and there's no new image, it means the user removed their photo
-      else if (!profileImageUrl && userData?.profileImageUrl) {
+      // If profileImageUrl is empty but the user previously had a profile picture, delete it
+      else if (profileImageUrl === '' && userData?.profileImageUrl) {
         // User had a profile picture before but removed it
         imageUrl = '';
         await deleteProfileImage();

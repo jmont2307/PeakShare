@@ -239,7 +239,7 @@ const NewPostScreen = ({ navigation }) => {
             <View style={styles.weatherContainer}>
               <Text style={styles.sectionTitle}>Current Weather at Location</Text>
               <View style={styles.weatherInfo}>
-                <Text style={styles.temperature}>{Math.round(weather.temperature)}°C</Text>
+                <Text style={styles.temperature}>{Math.round(weather.temperature)}°C / {Math.round(weather.temperatureF)}°F</Text>
                 <Text style={styles.conditions}>{weather.conditions}</Text>
                 {weather.snowfall > 0 && (
                   <Text style={styles.snowfall}>Recent snowfall: {weather.snowfall}cm</Text>

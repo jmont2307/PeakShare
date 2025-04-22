@@ -26,7 +26,7 @@ const ResortCard = ({ resort, onPress }) => {
           </Text>
           {resort.weather && (
             <Text style={styles.statItem}>
-              <Text style={styles.statValue}>{Math.round(resort.weather.temperature)}°C</Text>
+              <Text style={styles.statValue}>{Math.round(resort.weather.temperature)}°C / {Math.round(resort.weather.temperatureF)}°F</Text>
             </Text>
           )}
         </View>

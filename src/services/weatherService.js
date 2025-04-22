@@ -54,6 +54,7 @@ export const fetchWeatherForLocation = async (latitude, longitude, resortName = 
       
       return {
         temperature: current.temp_c,
+        temperatureF: current.temp_f,
         conditions: current.condition?.text || 'Unknown',
         windSpeed: current.wind_kph,
         humidity: current.humidity,
@@ -113,8 +114,12 @@ function generateMockWeatherData(latitude, longitude, resortName) {
     ? calculatePowderRating(snowfall, temperature, windSpeed)
     : 0;
   
+  // Convert Celsius to Fahrenheit
+  const temperatureF = (temperature * 9/5) + 32;
+
   return {
     temperature,
+    temperatureF: Math.round(temperatureF),
     conditions: condition,
     windSpeed,
     humidity,

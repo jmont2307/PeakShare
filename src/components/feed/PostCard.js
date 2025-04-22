@@ -107,7 +107,7 @@ const PostCard = ({ post, onPress }) => {
                   color={theme.colors.snow} 
                   style={styles.weatherIcon}
                 />
-                <Text style={styles.temperature}>{post.weather.temperature}°</Text>
+                <Text style={styles.temperature}>{post.weather.temperature}°C / {post.weather.temperatureF}°F</Text>
                 <Text style={styles.conditions}>{post.weather.conditions}</Text>
               </View>
             )}
@@ -126,7 +126,7 @@ const PostCard = ({ post, onPress }) => {
                   color={theme.colors.primary} 
                 />
                 <Text style={styles.textOnlyWeatherText}>
-                  {post.weather.temperature}° • {post.weather.conditions}
+                  {post.weather.temperature}°C / {post.weather.temperatureF}°F • {post.weather.conditions}
                 </Text>
               </View>
             )}

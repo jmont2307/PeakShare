@@ -34,7 +34,7 @@ const WeatherCard = ({ weather }) => {
             color="#0066CC" 
           />
           <View style={styles.weatherDetails}>
-            <Text style={styles.temperature}>{Math.round(weather.temperature)}°C</Text>
+            <Text style={styles.temperature}>{Math.round(weather.temperature)}°C / {Math.round(weather.temperatureF)}°F</Text>
             <Text style={styles.conditions}>{weather.conditions}</Text>
             <Text style={styles.windSpeed}>Wind: {weather.windSpeed} km/h</Text>
             <Text style={styles.humidity}>Humidity: {weather.humidity}%</Text>

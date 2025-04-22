@@ -326,7 +326,7 @@ const PostDetailScreen = ({ navigation, route }) => {
                       color={theme.colors.primary} 
                     />
                     <Text style={styles.textOnlyPostWeatherText}>
-                      {post.weather.temperature}° • {post.weather.conditions}
+                      {post.weather.temperature}°C / {post.weather.temperatureF}°F • {post.weather.conditions}
                     </Text>
                   </View>
                 )}
