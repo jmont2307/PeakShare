@@ -1,7 +1,6 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 // Load environment variables from .env file in development
 if (process.env.NODE_ENV !== 'production') {
@@ -10,46 +9,10 @@ if (process.env.NODE_ENV !== 'production') {
 
 const PORT = process.env.PORT || 3002;
 
-// Ensure the dist directory exists
+// Ensure dist directory exists
 const distDir = path.join(__dirname, 'dist');
 if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir, { recursive: true });
-}
-
-// Check if index.html exists in dist directory
-if (!fs.existsSync(path.join(distDir, 'index.html'))) {
-  console.log('No index.html found in dist directory');
-  
-  // Copy static.html from public directory if it exists
-  const staticHtmlPath = path.join(__dirname, 'public', 'static.html');
-  if (fs.existsSync(staticHtmlPath)) {
-    console.log('Copying static.html to dist/index.html');
-    fs.copyFileSync(staticHtmlPath, path.join(distDir, 'index.html'));
-  } else {
-    // Create a basic index.html
-    console.log('Creating basic index.html');
-    const basicHtml = `<!DOCTYPE html>
-<html>
-<head>
-  <title>PeakShare</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { font-family: sans-serif; margin: 0; padding: 20px; text-align: center; }
-    h1 { color: #0066cc; }
-    .container { max-width: 800px; margin: 40px auto; padding: 20px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>PeakShare</h1>
-    <p>Connect with ski enthusiasts worldwide</p>
-    <p>The application is running. API status can be checked at <a href="/api/health">/api/health</a></p>
-  </div>
-  <div id="root"></div>
-</body>
-</html>`;
-    fs.writeFileSync(path.join(distDir, 'index.html'), basicHtml);
-  }
 }
 
 const server = http.createServer((req, res) => {
@@ -59,19 +22,24 @@ const server = http.createServer((req, res) => {
     return res.end(JSON.stringify({ 
       status: 'ok', 
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development'
+      environment: process.env.NODE_ENV || 'development',
+      version: '1.0.0'
     }));
   }
   
-  // Determine the file path based on the URL
+  // For all static files, try to serve from dist directory first
   let filePath;
-  if (req.url === '/') {
+  let reqPath = req.url.split('?')[0]; // Remove query parameters
+  
+  if (reqPath === '/') {
+    // Serve index.html for root path
     filePath = path.join(distDir, 'index.html');
   } else {
-    filePath = path.join(distDir, req.url);
+    // Try to find the file in dist
+    filePath = path.join(distDir, reqPath);
   }
   
-  // Get the file extension
+  // Get file extension
   const extname = String(path.extname(filePath)).toLowerCase();
   
   // Content type mapping
@@ -85,41 +53,44 @@ const server = http.createServer((req, res) => {
     '.jpeg': 'image/jpeg',
     '.gif': 'image/gif',
     '.svg': 'image/svg+xml',
-    '.ico': 'image/x-icon'
+    '.ico': 'image/x-icon',
+    '.woff': 'font/woff',
+    '.woff2': 'font/woff2',
+    '.ttf': 'font/ttf',
+    '.eot': 'application/vnd.ms-fontobject',
+    '.otf': 'font/otf'
   };
-
-  // Set content type header
+  
   const contentType = contentTypes[extname] || 'text/plain';
   
-  // Read file
+  // Read file and serve it
   fs.readFile(filePath, (error, content) => {
     if (error) {
-      if(error.code === 'ENOENT') {
-        // Client-side routing - serve index.html for paths that don't exist but look like routes
-        if (!extname && !req.url.includes('.')) {
-          fs.readFile(path.join(distDir, 'index.html'), (err, content) => {
+      if (error.code === 'ENOENT') {
+        // For SPA client-side routing, serve index.html for routes that don't have file extensions
+        if (!extname && !reqPath.includes('.')) {
+          fs.readFile(path.join(distDir, 'index.html'), (err, indexContent) => {
             if (err) {
               res.writeHead(500);
-              res.end('Server Error: Could not load index.html');
-              return;
+              console.error('Error reading index.html:', err);
+              return res.end('Error reading index.html');
             }
             res.writeHead(200, { 'Content-Type': 'text/html' });
-            res.end(content, 'utf-8');
+            return res.end(indexContent, 'utf-8');
           });
-          return;
+        } else {
+          // Actual 404 for missing static files with extensions
+          res.writeHead(404);
+          res.end('Not found: ' + reqPath);
         }
-        
-        // File not found - 404
-        res.writeHead(404);
-        res.end('404 Not Found: ' + req.url);
       } else {
         // Server error
-        console.error(`Server Error: ${error.code}`);
+        console.error('Server error:', error);
         res.writeHead(500);
-        res.end(`Server Error: ${error.code}`);
+        res.end('Server error: ' + error.code);
       }
     } else {
-      // Success
+      // Success - serve the file
       res.writeHead(200, { 'Content-Type': contentType });
       res.end(content, 'utf-8');
     }

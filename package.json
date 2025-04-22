@@ -2,10 +2,13 @@
   "name": "peakshare",
   "version": "1.0.0",
   "main": "server.js",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "webpack serve --mode development --open",
-    "build": "NODE_ENV=production webpack --mode production || true",
+    "build": "NODE_ENV=production webpack",
     "web": "npm run dev",
     "expo": "expo start"
   },

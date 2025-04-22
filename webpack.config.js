@@ -1,77 +1,64 @@
 const path = require('path');
 const webpack = require('webpack');
-
-// Define plugins variable first
-let plugins = [];
-
-// Add HtmlWebpackPlugin if available
-let HtmlWebpackPlugin;
-try {
-  HtmlWebpackPlugin = require('html-webpack-plugin');
-  plugins.push(new HtmlWebpackPlugin({
-    template: path.join(__dirname, 'public/index.html'),
-  }));
-} catch (e) {
-  console.warn('HtmlWebpackPlugin not available');
-}
-
-// Add CopyWebpackPlugin if available
-let CopyWebpackPlugin;
-try {
-  CopyWebpackPlugin = require('copy-webpack-plugin');
-  plugins.push(new CopyWebpackPlugin({
-    patterns: [
-      { from: 'assets', to: 'assets' }
-    ],
-  }));
-} catch (e) {
-  console.warn('CopyWebpackPlugin not available');
-}
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const appDirectory = path.resolve(__dirname);
+const nodeModulesPath = path.join(appDirectory, 'node_modules');
 
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
-  bail: false, // Don't fail on first error
-  entry: {
-    main: './src/index.web.js'
-  },
+  entry: path.join(appDirectory, 'src/index.web.js'),
   output: {
     path: path.resolve(appDirectory, 'dist'),
     publicPath: '/',
     filename: 'bundle.js',
   },
+  resolve: {
+    extensions: ['.web.js', '.js', '.jsx', '.ts', '.tsx'],
+    alias: {
+      'react-native$': 'react-native-web',
+    },
+    fallback: {
+      'path': require.resolve('path-browserify'),
+      'stream': require.resolve('stream-browserify'),
+    }
+  },
   module: {
     rules: [
-      // Process JS with Babel
       {
-        test: /\.(js|jsx)$/,
+        test: /\.jsx?$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
           options: {
             presets: ['@babel/preset-env', '@babel/preset-react'],
-            plugins: ['react-native-web'],
-          },
-        },
+            plugins: ['react-native-web']
+          }
+        }
       },
-      // Handle image assets
       {
-        test: /\.(gif|jpe?g|png|svg)$/,
-        type: 'asset',
-      },
+        test: /\.(png|jpe?g|gif|svg)$/i,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              esModule: false,
+            }
+          }
+        ]
+      }
     ]
   },
-  resolve: {
-    extensions: ['.web.js', '.js', '.jsx'],
-    alias: {
-      'react-native$': 'react-native-web',
-    }
-  },
   plugins: [
-    ...plugins,
+    new HtmlWebpackPlugin({
+      template: path.join(appDirectory, 'public/index.html'),
+      filename: 'index.html',
+      inject: true
+    }),
     new webpack.DefinePlugin({
-      __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
+      __DEV__: process.env.NODE_ENV !== 'production',
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
         FIREBASE_API_KEY: JSON.stringify(process.env.FIREBASE_API_KEY),
@@ -85,27 +72,27 @@ module.exports = {
         WEATHER_API_KEY: JSON.stringify(process.env.WEATHER_API_KEY),
       },
     }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'assets', to: 'assets' }
+      ]
+    }),
+    // Fix native modules
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+      setImmediate: 'setimmediate'
+    })
   ],
   devServer: {
-    static: [
-      {
-        directory: path.join(appDirectory, 'web'),
-        publicPath: '/',
-      },
-      {
-        directory: path.join(appDirectory, 'assets'),
-        publicPath: '/assets',
-      }
-    ],
+    static: {
+      directory: path.join(appDirectory, 'public'),
+    },
     port: 3002,
     hot: true,
     historyApiFallback: true,
     open: true,
     client: {
-      overlay: {
-        errors: true,
-        warnings: false,
-      },
-    },
-  },
+      overlay: true
+    }
+  }
 };
