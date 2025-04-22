@@ -16,14 +16,25 @@ if (!fs.existsSync(path.join(__dirname, 'dist', 'index.html'))) {
 }
 
 const server = http.createServer((req, res) => {
-  // Health check endpoint for Render
-  if (req.url === '/health') {
+  // Health check endpoints for Render
+  if (req.url === '/health' || req.url === '/api/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }));
+    return res.end(JSON.stringify({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      memory: process.memoryUsage(),
+      uptime: process.uptime()
+    }));
   }
   
-  // Default to index.html
-  let filePath = path.join(__dirname, 'dist', req.url === '/' ? 'index.html' : req.url);
+  // Default to static.html for the root path
+  let filePath;
+  if (req.url === '/') {
+    filePath = path.join(__dirname, 'public', 'static.html');
+  } else {
+    filePath = path.join(__dirname, 'dist', req.url);
+  }
   
   // Get the file extension
   const extname = String(path.extname(filePath)).toLowerCase();
@@ -48,17 +59,13 @@ const server = http.createServer((req, res) => {
   fs.readFile(filePath, (error, content) => {
     if (error) {
       if(error.code === 'ENOENT') {
-        // If the path has no file extension, it's likely a client-side route
-        // So serve index.html for client-side routing
-        if (!extname && !req.url.includes('.')) {
-          fs.readFile(path.join(__dirname, 'dist', 'index.html'), (err, content) => {
-            res.writeHead(200, { 'Content-Type': 'text/html' });
-            res.end(content, 'utf-8');
-          });
-          return;
-        }
-        // Page not found
-        fs.readFile(path.join(__dirname, 'dist', 'index.html'), (err, content) => {
+        // Always serve the static HTML for any route not found
+        fs.readFile(path.join(__dirname, 'public', 'static.html'), (err, content) => {
+          if (err) {
+            res.writeHead(500);
+            res.end('Server Error: Could not load static HTML');
+            return;
+          }
           res.writeHead(200, { 'Content-Type': 'text/html' });
           res.end(content, 'utf-8');
         });
