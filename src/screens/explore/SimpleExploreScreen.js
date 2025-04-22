@@ -12,6 +12,7 @@ import {
   Alert
 } from 'react-native';
 import LinearGradient from 'react-native-web-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchResorts, searchResorts, seedResorts } from '../../redux/slices/resortsSlice';
 import { fetchWeatherForLocation } from '../../services/weatherService';
@@ -203,23 +204,30 @@ const SimpleExploreScreen = ({ navigation }) => {
   
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.logoText}>PeakShare</Text>
-        <TouchableOpacity 
-          style={styles.loginButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.loginButtonText}>Back</Text>
-        </TouchableOpacity>
-      </View>
-      
       <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search resorts..."
-          value={searchQuery}
-          onChangeText={handleSearch}
-        />
+        <View style={styles.searchInputWrapper}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={24} color={theme.colors.midnight} />
+          </TouchableOpacity>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search resorts, locations, tags..."
+            value={searchQuery}
+            onChangeText={handleSearch}
+            autoFocus={true}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={() => setSearchQuery('')}
+            >
+              <Ionicons name="close-circle" size={20} color={theme.colors.mountain} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
       
       <View style={styles.bannerContainer}>
@@ -271,41 +279,33 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.silver,
-  },
-  logoText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: theme.colors.primary,
-  },
-  loginButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 4,
-  },
-  loginButtonText: {
-    color: theme.colors.primary,
-    fontWeight: '500',
-  },
   searchContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    paddingTop: 50,
+    backgroundColor: theme.colors.background,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.silver,
   },
-  searchInput: {
+  searchInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: theme.colors.surface,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
     borderRadius: 8,
-    fontSize: 16,
     borderWidth: 1,
     borderColor: theme.colors.silver,
+  },
+  backButton: {
+    padding: 10,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 10,
+    fontSize: 16,
+    color: theme.colors.midnight,
+  },
+  clearButton: {
+    padding: 10,
   },
   bannerContainer: {
     height: 200,

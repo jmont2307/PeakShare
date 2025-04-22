@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity, Image, Text, ActivityIndicator } from 'react-native';
 import { Appbar, Searchbar, Chip, Button } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
+import { Ionicons } from '@expo/vector-icons';
 import { fetchResorts, searchResorts } from '../../redux/slices/resortsSlice';
 // Import Firebase from our own file for web compatibility
 import nativeModules from '../../native-modules';
@@ -159,19 +160,20 @@ const ExploreScreen = ({ navigation }) => {
   
   return (
     <View style={styles.container}>
-      <Appbar.Header>
-        <Appbar.Content title="Explore" />
-      </Appbar.Header>
-      
-      <View style={styles.searchContainer}>
-        <Searchbar
-          placeholder="Search resorts, locations..."
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          onSubmitEditing={handleSearch}
-          style={styles.searchBar}
-        />
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Explore</Text>
       </View>
+      
+      <TouchableOpacity 
+        style={styles.searchContainer}
+        activeOpacity={0.7}
+        onPress={() => navigation.navigate('SimpleExplore')}
+      >
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={18} color="#666" style={styles.searchIcon} />
+          <Text style={styles.searchPlaceholder}>Search resorts, locations, or tags</Text>
+        </View>
+      </TouchableOpacity>
       
       <View style={styles.filtersContainer}>
         <Chip 
@@ -213,12 +215,35 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 50,
+    paddingBottom: 10,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#DDDDDD',
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333333',
+  },
   searchContainer: {
     padding: 10,
   },
   searchBar: {
-    elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0F0F0',
     borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchPlaceholder: {
+    color: '#666',
+    fontSize: 16,
   },
   filtersContainer: {
     flexDirection: 'row',

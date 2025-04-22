@@ -83,23 +83,84 @@ export default function AppNavigator() {
   }
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator 
+      screenOptions={{ 
+        headerShown: true,
+        headerTitleAlign: 'center',
+        headerStyle: {
+          backgroundColor: theme.colors.background,
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 0.5,
+          borderBottomColor: theme.colors.silver,
+        },
+        headerTintColor: theme.colors.midnight,
+        headerBackTitle: null,
+      }}
+    >
       {user ? (
         <>
-          <Stack.Screen name="Main" component={MainTabs} />
-          <Stack.Screen name="PostDetail" component={PostDetailScreen} />
-          <Stack.Screen name="ResortDetail" component={ResortDetailScreen} />
-          <Stack.Screen name="SimpleExplore" component={SimpleExploreScreen} />
-          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-          <Stack.Screen name="Followers" component={FollowersScreen} />
-          <Stack.Screen name="Following" component={FollowingScreen} />
-          <Stack.Screen name="Settings" component={SettingsScreen} />
-          <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+          <Stack.Screen 
+            name="Main" 
+            component={MainTabs} 
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen 
+            name="PostDetail" 
+            component={PostDetailScreen} 
+            options={{ title: 'Post' }}
+          />
+          <Stack.Screen 
+            name="ResortDetail" 
+            component={ResortDetailScreen} 
+            options={{ title: 'Resort' }}
+          />
+          <Stack.Screen 
+            name="SimpleExplore" 
+            component={SimpleExploreScreen} 
+            options={{ title: 'Explore' }}
+          />
+          <Stack.Screen 
+            name="EditProfile" 
+            component={EditProfileScreen} 
+            options={{ title: 'Edit Profile' }}
+          />
+          <Stack.Screen 
+            name="Followers" 
+            component={FollowersScreen} 
+            options={{ title: 'Followers' }}
+          />
+          <Stack.Screen 
+            name="Following" 
+            component={FollowingScreen} 
+            options={{ title: 'Following' }}
+          />
+          <Stack.Screen 
+            name="Settings" 
+            component={SettingsScreen} 
+            options={{ title: 'Settings' }}
+          />
+          <Stack.Screen 
+            name="ChangePassword" 
+            component={ChangePasswordScreen} 
+            options={{ title: 'Change Password' }}
+          />
         </>
       ) : (
         <>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen 
+            name="Login" 
+            component={LoginScreen} 
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen 
+            name="Register" 
+            component={RegisterScreen} 
+            options={{ 
+              title: 'Create Account',
+              headerShadowVisible: false,
+            }}
+          />
         </>
       )}
     </Stack.Navigator>

@@ -27,12 +27,28 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [userData, setLocalUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [savedAccounts, setSavedAccounts] = useState([
+    {
+      uid: 'test-user-123',
+      email: 'test@example.com',
+      username: 'testuser',
+      displayName: 'Test User',
+      profileImageUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=60',
+    },
+    {
+      uid: 'test-user-456',
+      email: 'jane@example.com',
+      username: 'janedoe',
+      displayName: 'Jane Doe',
+      profileImageUrl: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=60',
+    }
+  ]);
   
   const dispatch = useDispatch();
 
   // Handle user state changes
   useEffect(() => {
-    // Always set user to null to force login screen
+    // Always set user to null to force login screen initially
     setUser(null);
     setLocalUserData(null);
     dispatch(clearUserData());
@@ -182,6 +198,43 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Add switchAccount function
+  const switchAccount = (accountId) => {
+    try {
+      const selectedAccount = savedAccounts.find(account => account.uid === accountId);
+      
+      if (selectedAccount) {
+        // Set user and userData
+        const mockUser = {
+          uid: selectedAccount.uid,
+          email: selectedAccount.email,
+          displayName: selectedAccount.displayName,
+        };
+        
+        setUser(mockUser);
+        
+        // Create mock user data
+        const mockUserData = {
+          ...selectedAccount,
+          bio: `${selectedAccount.displayName}'s profile`,
+          location: 'Mountain View, CA',
+          postCount: Math.floor(Math.random() * 20) + 5,
+          followerCount: Math.floor(Math.random() * 500) + 100,
+          followingCount: Math.floor(Math.random() * 200) + 40,
+        };
+        
+        setLocalUserData(mockUserData);
+        dispatch(setUserData(mockUserData));
+        
+        return { success: true };
+      } else {
+        return { success: false, error: 'Account not found' };
+      }
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -190,7 +243,9 @@ export const AuthProvider = ({ children }) => {
       login,
       register,
       logout,
-      resetPassword
+      resetPassword,
+      savedAccounts,
+      switchAccount
     }}>
       {children}
     </AuthContext.Provider>
