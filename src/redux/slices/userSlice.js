@@ -219,17 +219,18 @@ const generateMockUsers = (count) => {
                      'alpine_skier', 'backcountry_pro', 'snow_surfer', 'freestyle_king', 'mogul_queen'];
   const displayNames = ['Alex Johnson', 'Sam Smith', 'Jordan Lee', 'Taylor Kim', 'Morgan Chen',
                         'Riley Garcia', 'Casey Wong', 'Jamie Davis', 'Quinn Park', 'Avery Martinez'];
+  // Using default profile placeholders instead of specific images
   const profileImages = [
-    'https://images.unsplash.com/photo-1600486913747-55e5470d6f40?w=200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=200&auto=format&fit=crop'
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS'
   ];
   
   const users = [];
@@ -274,11 +275,11 @@ const generateMockNotifications = (userId) => {
     'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=200&auto=format&fit=crop'
   ];
   const profileImages = [
-    'https://images.unsplash.com/photo-1600486913747-55e5470d6f40?w=200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=200&auto=format&fit=crop'
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
+    'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS'
   ];
   
   // Generate text based on notification type

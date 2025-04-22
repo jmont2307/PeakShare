@@ -14,7 +14,7 @@ import {
 import LinearGradient from 'react-native-web-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchResorts, searchResorts, seedResorts } from '../../redux/slices/resortsSlice';
+import { fetchResorts, searchResorts, seedResorts, clearSearchResults } from '../../redux/slices/resortsSlice';
 import { fetchWeatherForLocation } from '../../services/weatherService';
 import { theme } from '../../theme';
 
@@ -119,8 +119,12 @@ const SimpleExploreScreen = ({ navigation }) => {
   const handleSearch = (query) => {
     setSearchQuery(query);
     
+    // Perform search if query is at least 2 characters
     if (query.length >= 2) {
       dispatch(searchResorts(query));
+    } else if (query.length === 0) {
+      // If query is empty, clear search results
+      dispatch(clearSearchResults());
     }
   };
   

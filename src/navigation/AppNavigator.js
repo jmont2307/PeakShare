@@ -17,13 +17,16 @@ import NewPostScreen from '../screens/post/NewPostScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import NotificationsScreen from '../screens/notifications/NotificationsScreen';
 import PostDetailScreen from '../screens/post/PostDetailScreen';
+import PostInteractionsScreen from '../screens/post/PostInteractionsScreen';
 import ResortDetailScreen from '../screens/explore/ResortDetailScreen';
+import ResortListScreen from '../screens/explore/ResortListScreen';
 import SimpleExploreScreen from '../screens/explore/SimpleExploreScreen';
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
 import FollowersScreen from '../screens/profile/FollowersScreen';
 import FollowingScreen from '../screens/profile/FollowingScreen';
 import SettingsScreen from '../screens/profile/SettingsScreen';
 import ChangePasswordScreen from '../screens/auth/ChangePasswordScreen';
+import PostHistoryScreen from '../screens/profile/PostHistoryScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -144,6 +147,21 @@ export default function AppNavigator() {
             name="ChangePassword" 
             component={ChangePasswordScreen} 
             options={{ title: 'Change Password' }}
+          />
+          <Stack.Screen 
+            name="PostHistory" 
+            component={PostHistoryScreen} 
+            options={{ title: 'Post History' }}
+          />
+          <Stack.Screen 
+            name="PostInteractions" 
+            component={PostInteractionsScreen} 
+            options={{ title: 'Post Interactions' }}
+          />
+          <Stack.Screen 
+            name="ResortList" 
+            component={ResortListScreen} 
+            options={{ title: 'Ski Resorts' }}
           />
         </>
       ) : (

@@ -252,10 +252,31 @@ const PostDetailScreen = ({ navigation, route }) => {
   };
   
   // Handle share
-  const handleShare = () => {
-    // Implement share functionality
-    // This would typically use the Share API in a real app
-    console.log('Share post:', post.id);
+  const handleShare = async () => {
+    try {
+      // Prepare share content
+      const title = `Check out this post by ${post.username} on PeakShare`;
+      const message = post.caption 
+        ? `${post.caption}\n\nShared from PeakShare - Connect with Skiers & Snowboarders`
+        : 'Shared from PeakShare - Connect with Skiers & Snowboarders';
+      
+      // Call native share functionality
+      const options = {
+        title,
+        message,
+        url: post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : null
+      };
+      
+      // Use React Native's Share API
+      const { Share } = require('react-native');
+      const result = await Share.share(options);
+      
+      if (result.action === Share.sharedAction) {
+        console.log('Post shared successfully');
+      }
+    } catch (error) {
+      console.error('Error sharing post:', error);
+    }
   };
   
   if (!post) {

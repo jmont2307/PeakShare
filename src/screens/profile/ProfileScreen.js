@@ -200,23 +200,47 @@ const ProfileScreen = ({ navigation }) => {
         <Divider style={styles.divider} />
         
         <View style={styles.postsContainer}>
-          <Text style={styles.sectionTitle}>Posts</Text>
+          <View style={styles.postsHeader}>
+            <Text style={styles.sectionTitle}>Posts</Text>
+            {userPosts.length > 0 && (
+              <Button 
+                mode="text" 
+                onPress={() => navigation.navigate('PostHistory')}
+                color={theme.colors.primary}
+                compact
+              >
+                View History
+              </Button>
+            )}
+          </View>
           
           {postsLoading ? (
             <ActivityIndicator size="small" color="#0066CC" style={styles.postsLoading} />
           ) : userPosts.length > 0 ? (
-            <FlatList
-              data={userPosts}
-              keyExtractor={(item) => item.id}
-              numColumns={3}
-              scrollEnabled={false}
-              renderItem={({ item }) => (
-                <PostThumbnail 
-                  post={item} 
-                  onPress={() => navigation.navigate('PostDetail', { post: item })}
-                />
-              )}
-            />
+            <>
+              <FlatList
+                data={userPosts}
+                keyExtractor={(item) => item.id}
+                numColumns={3}
+                scrollEnabled={false}
+                renderItem={({ item }) => (
+                  <PostThumbnail 
+                    post={item} 
+                    onPress={() => navigation.navigate('PostDetail', { post: item })}
+                  />
+                )}
+              />
+              <View style={styles.viewAllContainer}>
+                <Button 
+                  mode="outlined" 
+                  onPress={() => navigation.navigate('PostHistory')}
+                  style={styles.viewAllButton}
+                  icon="history"
+                >
+                  View Post History & Interactions
+                </Button>
+              </View>
+            </>
           ) : (
             <View style={styles.emptyPostsContainer}>
               <Text style={styles.emptyPostsText}>No posts yet</Text>
@@ -385,6 +409,12 @@ const styles = StyleSheet.create({
   postsContainer: {
     padding: 16,
   },
+  postsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   postsLoading: {
     marginVertical: 20,
   },
@@ -409,6 +439,13 @@ const styles = StyleSheet.create({
   },
   createPostButton: {
     marginTop: 8,
+  },
+  viewAllContainer: {
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  viewAllButton: {
+    minWidth: 250,
   },
 });
 

@@ -110,6 +110,76 @@ export const fetchUserPosts = createAsyncThunk(
   }
 );
 
+export const fetchPostInteractions = createAsyncThunk(
+  'posts/fetchPostInteractions',
+  async (postId, { rejectWithValue }) => {
+    try {
+      // Fetch likes for this post
+      const likesRef = collection(db, 'likes');
+      const likesQuery = query(
+        likesRef,
+        where('postId', '==', postId),
+        orderBy('createdAt', 'desc'),
+        limit(5)
+      );
+      
+      const likesSnapshot = await getDocs(likesQuery);
+      
+      const likes = [];
+      for (const likeDoc of likesSnapshot.docs) {
+        const likeData = likeDoc.data();
+        
+        // Get user info for each like
+        const userRef = doc(db, 'users', likeData.userId);
+        const userDoc = await getDoc(userRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          
+          likes.push({
+            id: likeDoc.id,
+            timestamp: likeData.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+            user: {
+              id: likeData.userId,
+              username: userData.username,
+              profileImageUrl: userData.profileImageUrl
+            }
+          });
+        }
+      }
+      
+      // Fetch comments for this post
+      const commentsRef = collection(db, 'comments');
+      const commentsQuery = query(
+        commentsRef,
+        where('postId', '==', postId),
+        orderBy('createdAt', 'desc'),
+        limit(5)
+      );
+      
+      const commentsSnapshot = await getDocs(commentsQuery);
+      
+      const comments = commentsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          text: data.text,
+          timestamp: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+          user: {
+            id: data.userId,
+            username: data.username,
+            profileImageUrl: data.userProfileImageUrl
+          }
+        };
+      });
+      
+      return { postId, likes, comments };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const likePost = createAsyncThunk(
   'posts/likePost',
   async ({ postId, userId }, { rejectWithValue }) => {
@@ -167,7 +237,9 @@ const postsSlice = createSlice({
     loading: false,
     error: null,
     postingStatus: 'idle',
-    likedPosts: {}
+    likedPosts: {},
+    postInteractions: {},  // Store likes and comments for each post
+    loadingInteractions: false
   },
   reducers: {
     clearCurrentPost: (state) => {
@@ -229,6 +301,23 @@ const postsSlice = createSlice({
         if (state.currentPost && state.currentPost.id === postId) {
           state.currentPost = updatePostLikeCount(state.currentPost);
         }
+      })
+      
+      // Fetch post interactions
+      .addCase(fetchPostInteractions.pending, (state) => {
+        state.loadingInteractions = true;
+        state.error = null;
+      })
+      .addCase(fetchPostInteractions.fulfilled, (state, action) => {
+        const { postId, likes, comments } = action.payload;
+        state.loadingInteractions = false;
+        
+        // Store interactions for this post
+        state.postInteractions[postId] = { likes, comments };
+      })
+      .addCase(fetchPostInteractions.rejected, (state, action) => {
+        state.loadingInteractions = false;
+        state.error = action.payload;
       });
   },
 });

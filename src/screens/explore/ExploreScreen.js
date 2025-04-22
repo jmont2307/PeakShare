@@ -171,7 +171,22 @@ const ExploreScreen = ({ navigation }) => {
       >
         <View style={styles.searchBar}>
           <Ionicons name="search" size={18} color="#666" style={styles.searchIcon} />
-          <Text style={styles.searchPlaceholder}>Search resorts, locations, or tags</Text>
+          <Text style={styles.searchPlaceholder}>Search for any ski resort or location</Text>
+        </View>
+      </TouchableOpacity>
+      
+      <TouchableOpacity 
+        style={styles.resortDirectoryBanner}
+        activeOpacity={0.7}
+        onPress={() => navigation.navigate('ResortList')}
+      >
+        <View style={styles.resortDirectoryContent}>
+          <Ionicons name="compass" size={22} color="#0066CC" style={styles.directoryIcon} />
+          <View style={styles.directoryTextContainer}>
+            <Text style={styles.directoryTitle}>Full Resort Directory</Text>
+            <Text style={styles.directorySubtitle}>Browse all ski destinations worldwide</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#0066CC" />
         </View>
       </TouchableOpacity>
       
@@ -196,6 +211,13 @@ const ExploreScreen = ({ navigation }) => {
           style={styles.filterChip}
         >
           Nearby
+        </Chip>
+        <Chip 
+          onPress={() => navigation.navigate('ResortList')}
+          style={[styles.filterChip, styles.directoryChip]}
+          icon="book-open"
+        >
+          Resorts Directory
         </Chip>
       </View>
       
@@ -245,6 +267,34 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 16,
   },
+  resortDirectoryBanner: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    backgroundColor: '#E6F2FF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#CCE5FF',
+  },
+  resortDirectoryContent: {
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  directoryIcon: {
+    marginRight: 12,
+  },
+  directoryTextContainer: {
+    flex: 1,
+  },
+  directoryTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#0066CC',
+  },
+  directorySubtitle: {
+    fontSize: 12,
+    color: '#666',
+  },
   filtersContainer: {
     flexDirection: 'row',
     paddingHorizontal: 10,
@@ -252,6 +302,10 @@ const styles = StyleSheet.create({
   },
   filterChip: {
     marginRight: 8,
+  },
+  directoryChip: {
+    backgroundColor: '#E6F2FF',
+    marginTop: 5,
   },
   listContainer: {
     paddingHorizontal: 16,

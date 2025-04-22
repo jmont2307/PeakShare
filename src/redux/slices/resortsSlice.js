@@ -91,27 +91,67 @@ export const fetchResortDetails = createAsyncThunk(
 
 export const searchResorts = createAsyncThunk(
   'resorts/searchResorts',
-  async (searchQuery, { rejectWithValue }) => {
+  async (searchQuery, { rejectWithValue, getState }) => {
     try {
-      // In a real app, you'd use Algolia or Firebase's full-text search
-      // This is a simplified version that searches by name prefix
-      const resortsRef = collection(db, 'resorts');
-      const q = query(
-        resortsRef,
-        orderBy('name'),
-        startAt(searchQuery),
-        endAt(searchQuery + '\uf8ff'),
-        limit(20)
-      );
+      // Normalize the search query
+      const normalizedQuery = searchQuery.toLowerCase().trim();
       
-      const resortsSnapshot = await getDocs(q);
+      // For a more comprehensive search in a real app with lots of data
+      // we would use Algolia, Typesense or Firestore's full-text search capabilities
       
-      const resorts = resortsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      // But for our app, we'll do a client-side search of all resorts
+      // This allows us to search for partial matches in name, region, and country
+      const { resortsList } = getState().resorts;
       
-      return resorts;
+      // If we have resorts in the store, search through them
+      if (resortsList && resortsList.length > 0) {
+        const matchingResorts = resortsList.filter(resort => {
+          // Check name
+          if (resort.name?.toLowerCase().includes(normalizedQuery)) {
+            return true;
+          }
+          
+          // Check region
+          if (resort.region?.toLowerCase().includes(normalizedQuery)) {
+            return true;
+          }
+          
+          // Check country
+          if (resort.country?.toLowerCase().includes(normalizedQuery)) {
+            return true;
+          }
+          
+          // Check description
+          if (resort.description?.toLowerCase().includes(normalizedQuery)) {
+            return true;
+          }
+          
+          return false;
+        });
+        
+        return matchingResorts;
+      } 
+      // If we don't have resorts in the store yet, use the Firestore query approach
+      else {
+        // This is a simplified version that searches by name prefix
+        const resortsRef = collection(db, 'resorts');
+        const nameQuery = query(
+          resortsRef,
+          orderBy('name'),
+          startAt(normalizedQuery),
+          endAt(normalizedQuery + '\uf8ff'),
+          limit(20)
+        );
+        
+        const resortsSnapshot = await getDocs(nameQuery);
+        
+        const resorts = resortsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        return resorts;
+      }
     } catch (error) {
       return rejectWithValue(error.message);
     }

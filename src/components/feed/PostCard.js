@@ -57,6 +57,39 @@ const PostCard = ({ post, onPress }) => {
   const navigateToUserProfile = () => {
     navigation.navigate('Profile', { userId: post.userId });
   };
+  
+  const handleShare = async () => {
+    try {
+      // Prepare share content
+      const title = `Check out this post by ${post.username} on PeakShare`;
+      const message = post.caption 
+        ? `${post.caption}\n\nShared from PeakShare - Connect with Skiers & Snowboarders`
+        : 'Shared from PeakShare - Connect with Skiers & Snowboarders';
+      
+      // Call native share functionality
+      const options = {
+        title,
+        message,
+        url: post.imageUrls && post.imageUrls.length > 0 ? post.imageUrls[0] : null
+      };
+      
+      // Use React Native's Share API
+      const { Share } = require('react-native');
+      const result = await Share.share(options);
+      
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          console.log('Shared with activity type:', result.activityType);
+        } else {
+          console.log('Shared successfully');
+        }
+      } else if (result.action === Share.dismissedAction) {
+        console.log('Share dismissed');
+      }
+    } catch (error) {
+      console.error('Error sharing post:', error);
+    }
+  };
 
   const formatTimestamp = (timestamp) => {
     try {
@@ -150,7 +183,7 @@ const PostCard = ({ post, onPress }) => {
           >
             <Ionicons name="chatbubble-outline" size={24} color={theme.colors.midnight} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
             <Ionicons name="paper-plane-outline" size={24} color={theme.colors.midnight} />
           </TouchableOpacity>
         </View>
@@ -166,7 +199,12 @@ const PostCard = ({ post, onPress }) => {
       
       {/* Like count */}
       <View style={styles.contentContainer}>
-        <Text style={styles.likeCount}>{likeCount} likes</Text>
+        <View style={styles.likeRow}>
+          <Text style={styles.likeCount}>{likeCount} likes</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('PostInteractions', { post })}>
+            <Text style={styles.viewInteractions}>View interactions</Text>
+          </TouchableOpacity>
+        </View>
         
         {/* Caption */}
         <View style={styles.captionContainer}>
@@ -272,11 +310,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 8,
   },
+  likeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   likeCount: {
     fontWeight: 'bold',
-    marginBottom: 4,
     fontSize: 14,
     color: theme.colors.midnight,
+  },
+  viewInteractions: {
+    fontSize: 12,
+    color: theme.colors.primary,
   },
   captionContainer: {
     flexDirection: 'row',
