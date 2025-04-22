@@ -136,9 +136,27 @@
     </div>
     
     <div class="cta">
-      <p>The full app is under maintenance. Please check back soon for updates!</p>
+      <p>The full app is launching soon. Check back for updates!</p>
       <a href="/api/health" class="button">Check API Status</a>
     </div>
   </div>
+  
+  <div id="root"></div>
+  <script>
+    console.log('PeakShare app initialized');
+    // Check health endpoint
+    fetch('/api/health')
+      .then(response => response.json())
+      .then(data => {
+        console.log('API status:', data);
+        if (data.status === 'ok') {
+          document.querySelector('.status').textContent = '✅ API Connected';
+        }
+      })
+      .catch(error => {
+        console.error('API status check failed:', error);
+        document.querySelector('.status').textContent = '❌ API Connection Failed';
+      });
+  </script>
 </body>
 </html>
