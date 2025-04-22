@@ -1,5 +1,5 @@
 import * as Location from 'expo-location';
-import { GOOGLE_MAPS_API_KEY } from '@env';
+import { GOOGLE_MAPS_API_KEY } from '../env';
 
 
 // Google Maps API endpoints

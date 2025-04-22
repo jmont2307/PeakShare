@@ -3,7 +3,9 @@ import { View, StyleSheet, FlatList, TouchableOpacity, Image, Text, ActivityIndi
 import { Appbar, Searchbar, Chip, Button } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchResorts, searchResorts } from '../../redux/slices/resortsSlice';
-import firestore from '@react-native-firebase/firestore';
+// Import Firebase from our own file for web compatibility
+import nativeModules from '../../native-modules';
+const firestore = nativeModules.firestore;
 
 const ResortCard = ({ resort, onPress }) => {
   return (

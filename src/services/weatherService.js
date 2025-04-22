@@ -1,6 +1,6 @@
 
 import axios from 'axios';
-import { WEATHER_API_KEY } from '@env';
+import { WEATHER_API_KEY } from '../env';
 
 
 // WeatherAPI.com endpoint
