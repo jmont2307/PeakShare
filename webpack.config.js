@@ -6,7 +6,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const appDirectory = path.resolve(__dirname);
 
 module.exports = {
-  mode: 'development',
+  mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   entry: path.join(appDirectory, 'src/index.web.js'),
   output: {
     path: path.resolve(appDirectory, 'dist'),

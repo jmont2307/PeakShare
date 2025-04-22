@@ -42,6 +42,15 @@ const server = http.createServer((req, res) => {
   fs.readFile(filePath, (error, content) => {
     if (error) {
       if(error.code === 'ENOENT') {
+        // If the path has no file extension, it's likely a client-side route
+        // So serve index.html for client-side routing
+        if (!extname && !req.url.includes('.')) {
+          fs.readFile(path.join(__dirname, 'dist', 'index.html'), (err, content) => {
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.end(content, 'utf-8');
+          });
+          return;
+        }
         // Page not found
         fs.readFile(path.join(__dirname, 'dist', 'index.html'), (err, content) => {
           res.writeHead(200, { 'Content-Type': 'text/html' });
