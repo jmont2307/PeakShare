@@ -12,7 +12,8 @@ import {
   Text,
   ActivityIndicator,
   Avatar,
-  Divider
+  Divider,
+  useTheme
 } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { AuthContext } from '../../contexts/AuthContext';
@@ -98,7 +99,8 @@ const NotificationItem = ({ notification, onPress, onUserPress }) => {
 const NotificationsScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { user } = useContext(AuthContext);
-  const { notifications, loading } = useSelector((state) => state.user);
+  const { notifications, notificationsLoading } = useSelector((state) => state.user);
+  const theme = useTheme();
   
   const [refreshing, setRefreshing] = useState(false);
   
@@ -125,24 +127,32 @@ const NotificationsScreen = ({ navigation }) => {
       case 'like':
       case 'comment':
       case 'tag':
-        navigation.navigate('PostDetail', { postId: notification.postId });
+      case 'mention':
+        // Create mock post object for navigation
+        const mockPost = {
+          id: notification.postId,
+          userId: notification.fromUser.id,
+          username: notification.fromUser.username,
+          userProfileImageUrl: notification.fromUser.profileImageUrl,
+          imageUrls: notification.postImage ? [notification.postImage] : [],
+          caption: 'This is an awesome skiing moment!',
+          createdAt: notification.timestamp
+        };
+        navigation.navigate('PostDetail', { post: mockPost });
         break;
       case 'follow':
-        navigation.navigate('OtherUserProfile', { userId: notification.fromUser.id });
-        break;
-      case 'mention':
-        navigation.navigate('PostDetail', { postId: notification.postId });
+        navigation.navigate('Profile', { userId: notification.fromUser.id });
         break;
       default:
         break;
     }
   };
   
-  const handleUserPress = (user) => {
-    if (user.id === user.uid) {
+  const handleUserPress = (fromUser) => {
+    if (fromUser.id === user?.uid) {
       navigation.navigate('Profile');
     } else {
-      navigation.navigate('OtherUserProfile', { userId: user.id });
+      navigation.navigate('Profile', { userId: fromUser.id });
     }
   };
   
@@ -156,15 +166,28 @@ const NotificationsScreen = ({ navigation }) => {
     </View>
   );
   
+  const dynamicStyles = {
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme.colors.background,
+    }
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={dynamicStyles.container}>
       <Appbar.Header>
         <Appbar.Content title="Notifications" />
       </Appbar.Header>
       
-      {loading && !refreshing && notifications.length === 0 ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#0066CC" />
+      {notificationsLoading && !refreshing && notifications.length === 0 ? (
+        <View style={dynamicStyles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       ) : (
         <FlatList
@@ -183,7 +206,7 @@ const NotificationsScreen = ({ navigation }) => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              colors={['#0066CC']}
+              colors={[theme.colors.primary]}
             />
           }
           contentContainerStyle={

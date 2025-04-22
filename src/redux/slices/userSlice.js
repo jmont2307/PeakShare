@@ -139,6 +139,112 @@ export const checkFollowStatus = createAsyncThunk(
   }
 );
 
+// Fetch user notifications
+export const fetchNotifications = createAsyncThunk(
+  'user/fetchNotifications',
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const { user } = getState();
+      const currentUser = user.userData;
+      
+      if (!currentUser || !currentUser.uid) {
+        return rejectWithValue('User not authenticated');
+      }
+      
+      // In a real app, this would query Firestore
+      // For this mock implementation, we'll generate fake notifications
+      return generateMockNotifications(currentUser.uid);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Mark notification as read
+export const markNotificationAsRead = createAsyncThunk(
+  'user/markNotificationAsRead',
+  async (notificationId, { getState, rejectWithValue }) => {
+    try {
+      // In a real app, this would update Firestore
+      return notificationId;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Generate mock notifications for development
+const generateMockNotifications = (userId) => {
+  const notificationTypes = ['like', 'comment', 'follow', 'mention', 'tag'];
+  const usernames = ['powder_hound', 'mountain_master', 'ski_guru', 'snow_rider', 'peak_explorer'];
+  const displayNames = ['Alex Johnson', 'Sam Smith', 'Jordan Lee', 'Taylor Kim', 'Morgan Chen'];
+  const postImages = [
+    'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1605540436563-5bca919ae766?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1453090927415-5f45085b65c0?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1488591216063-cb6ab485cece?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=200&auto=format&fit=crop'
+  ];
+  const profileImages = [
+    'https://images.unsplash.com/photo-1600486913747-55e5470d6f40?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=200&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=200&auto=format&fit=crop'
+  ];
+  
+  // Generate text based on notification type
+  const getNotificationText = (type, username) => {
+    switch (type) {
+      case 'like':
+        return `${username} liked your post`;
+      case 'comment':
+        return `${username} commented on your post: "Awesome shot! Love the powder!"`;
+      case 'follow':
+        return `${username} started following you`;
+      case 'mention':
+        return `${username} mentioned you in a comment: "Check out this amazing run @${username}!"`;
+      case 'tag':
+        return `${username} tagged you in a post`;
+      default:
+        return `${username} interacted with your content`;
+    }
+  };
+  
+  // Generate 10-15 random notifications
+  const count = Math.floor(Math.random() * 6) + 10; // 10-15 notifications
+  const notifications = [];
+  
+  for (let i = 0; i < count; i++) {
+    const type = notificationTypes[Math.floor(Math.random() * notificationTypes.length)];
+    const userIndex = Math.floor(Math.random() * usernames.length);
+    const username = usernames[userIndex];
+    const displayName = displayNames[userIndex];
+    const timestamp = new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)); // Random time in last week
+    const unread = Math.random() > 0.7; // 30% chance of being unread
+    const postImage = type === 'follow' ? null : postImages[Math.floor(Math.random() * postImages.length)];
+    
+    notifications.push({
+      id: `notification-${i}`,
+      type,
+      fromUser: {
+        id: `user-${i}`,
+        username,
+        displayName,
+        profileImageUrl: profileImages[userIndex],
+      },
+      text: getNotificationText(type, displayName),
+      postId: type === 'follow' ? null : `post-${i}`,
+      postImage,
+      timestamp: timestamp.toISOString(),
+      unread,
+    });
+  }
+  
+  // Sort by timestamp, newest first
+  return notifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+};
+
 const userSlice = createSlice({
   name: 'user',
   initialState: {
@@ -147,7 +253,9 @@ const userSlice = createSlice({
     loading: false,
     error: null,
     followStatus: {},
-    updatingProfile: false
+    updatingProfile: false,
+    notifications: [],
+    notificationsLoading: false
   },
   reducers: {
     setUserData: (state, action) => {
@@ -228,6 +336,29 @@ const userSlice = createSlice({
       .addCase(checkFollowStatus.fulfilled, (state, action) => {
         const { following, targetUserId } = action.payload;
         state.followStatus[targetUserId] = following;
+      })
+      
+      // Fetch notifications
+      .addCase(fetchNotifications.pending, (state) => {
+        state.notificationsLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchNotifications.fulfilled, (state, action) => {
+        state.notificationsLoading = false;
+        state.notifications = action.payload;
+      })
+      .addCase(fetchNotifications.rejected, (state, action) => {
+        state.notificationsLoading = false;
+        state.error = action.payload;
+      })
+      
+      // Mark notification as read
+      .addCase(markNotificationAsRead.fulfilled, (state, action) => {
+        const notificationId = action.payload;
+        const notification = state.notifications.find(n => n.id === notificationId);
+        if (notification) {
+          notification.unread = false;
+        }
       });
   },
 });
