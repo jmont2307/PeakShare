@@ -81,64 +81,38 @@ function MainTabs() {
 
 export default function AppNavigator() {
   const { user, loading } = useContext(AuthContext);
-  const [navError, setNavError] = useState(null);
   
-  // Log whenever auth state changes
-  useEffect(() => {
-    console.log('AppNavigator: Authentication state changed', { 
-      isAuthenticated: !!user, 
-      loading,
-      userEmail: user?.email,
-    });
-  }, [user, loading]);
-  
-  // Enhanced loading screen
+  // Simple loading screen
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <View style={styles.loadingContent}>
           <Text style={styles.loadingTitle}>PeakShare</Text>
           <ActivityIndicator size="large" color="#0066CC" style={styles.spinner} />
-          <Text style={styles.loadingText}>Preparing your mountain adventure...</Text>
+          <Text style={styles.loadingText}>Loading...</Text>
         </View>
       </View>
     );
   }
-  
-  // If we have a navigation error, show it
-  if (navError) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorTitle}>Navigation Error</Text>
-        <Text style={styles.errorMessage}>{navError.message}</Text>
-        <Button 
-          title="Retry" 
-          onPress={() => setNavError(null)} 
-          color="#0066CC"
-        />
-      </View>
-    );
-  }
 
-  try {
-    return (
-      <Stack.Navigator 
-        screenOptions={{ 
-          headerShown: true,
-          headerTitleAlign: 'center',
-          headerStyle: {
-            backgroundColor: theme.colors.background,
-            elevation: 0,
-            shadowOpacity: 0,
-            borderBottomWidth: 0.5,
-            borderBottomColor: theme.colors.silver,
-          },
-          headerTintColor: theme.colors.midnight,
-          headerBackTitle: null,
-        }}
-      >
-        {user ? (
-          <>
+  return (
+    <Stack.Navigator 
+      screenOptions={{ 
+        headerShown: true,
+        headerTitleAlign: 'center',
+        headerStyle: {
+          backgroundColor: theme.colors.background,
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 0.5,
+          borderBottomColor: theme.colors.silver,
+        },
+        headerTintColor: theme.colors.midnight,
+        headerBackTitle: null,
+      }}
+    >
+      {user ? (
+        <>
           <Stack.Screen 
             name="Main" 
             component={MainTabs} 
@@ -219,20 +193,6 @@ export default function AppNavigator() {
       )}
     </Stack.Navigator>
   );
-  } catch (error) {
-    console.error('Error rendering AppNavigator:', error);
-    setNavError(error);
-    
-    // Return fallback error UI
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorTitle}>Navigation Error</Text>
-        <Text style={styles.errorMessage}>
-          {error.message || 'An unexpected error occurred. Please try again.'}
-        </Text>
-      </View>
-    );
-  }
 }
 
 // Styles for the loading screen

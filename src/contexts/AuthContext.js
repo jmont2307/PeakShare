@@ -66,79 +66,37 @@ export const AuthProvider = ({ children }) => {
   
   const dispatch = useDispatch();
 
-  // Handle user state changes - with safer initialization
+  // Handle user state changes - simplified initialization
   useEffect(() => {
-    // Wrap in a try-catch for safety
-    const initializeAuth = async () => {
-      console.log('Initializing authentication state...');
-      
-      try {
-        // Explicitly set loading to true at start
-        setLoading(true);
-        
-        // For development, you might want to auto-login
-        // This is just for testing - remove for production
-        const autoLogin = false;  // Set to true to auto-login in dev
-
-        if (autoLogin) {
-          console.log('Auto-login enabled, using mock account');
-          // Use the first mock account
-          const mockAccount = savedAccounts[0];
-          if (mockAccount) {
-            setUser({
-              uid: mockAccount.uid,
-              email: mockAccount.email,
-              displayName: mockAccount.displayName,
-            });
-            
-            setLocalUserData(mockAccount);
-            dispatch(setUserData(mockAccount));
-          }
-        } else {
-          console.log('Auto-login disabled, directing to login screen');
-          // Force login screen - this is the normal flow
-          setUser(null);
-          setLocalUserData(null);
-          dispatch(clearUserData());
-        }
-      } catch (error) {
-        console.error('Critical error in auth initialization:', error);
-        // Make sure to clear auth state on error
-        setUser(null);
-        setLocalUserData(null);
-        dispatch(clearUserData());
-      } finally {
-        // Always set loading to false when done
-        console.log('Auth initialization complete, setting loading to false');
-        setLoading(false);
-      }
-    };
+    // Start with loading state
+    setLoading(true);
     
-    // Run the initialization
-    initializeAuth();
+    // Simple initialization - just show login screen
+    setUser(null);
+    setLocalUserData(null);
+    dispatch(clearUserData());
     
-    // Cleanup - nothing to do here
-    return () => {
-      console.log('Auth context unmounting');
-    };
-  }, [dispatch, savedAccounts]);
+    // Finish loading
+    setTimeout(() => {
+      setLoading(false);
+    }, 500);
+    
+    // No cleanup needed
+    return () => {};
+  }, [dispatch]);
 
   const login = async (email, password) => {
-    console.log('Login function called with:', email, password ? '********' : 'empty');
-    
     try {
-      // For testing: allow any email/password
+      // For testing: allow any email/password combination
       if (email && password) {
-        console.log('Creating mock user data...');
-        
-        // First create the basic user object (similar to Firebase user)
+        // Create simple mock user
         const mockUser = {
           uid: 'test-user-123',
           email: email,
           displayName: 'Test User',
         };
         
-        // Create full mock user data with placeholder image
+        // Create mock user data
         const mockUserData = {
           uid: 'test-user-123',
           email: email,
@@ -157,29 +115,13 @@ export const AuthProvider = ({ children }) => {
           }
         };
         
-        // IMPORTANT: Update states in the right order to prevent race conditions
-        try {
-          console.log('Setting user data in Redux store...');
-          
-          // 1. First update Redux state
-          dispatch(setUserData(mockUserData));
-          
-          // 2. Then update local component state
-          console.log('Setting local user data...');
-          setLocalUserData(mockUserData);
-          
-          // 3. Finally set the authenticated user (triggers navigation)
-          console.log('Setting authenticated user...');
-          setUser(mockUser);
-          
-          console.log('Login successful!');
-          return { success: true };
-        } catch (stateError) {
-          console.error('Error updating state during login:', stateError);
-          throw new Error('Failed to update application state: ' + stateError.message);
-        }
+        // Update states in a simple way
+        dispatch(setUserData(mockUserData));
+        setLocalUserData(mockUserData);
+        setUser(mockUser);
+        
+        return { success: true };
       } else {
-        console.log('Login failed: Missing email or password');
         return {
           success: false,
           error: 'Please enter both email and password.'
@@ -187,18 +129,9 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      // Ensure we clean up any partially set state
-      try {
-        setUser(null);
-        setLocalUserData(null); 
-        dispatch(clearUserData());
-      } catch (cleanupError) {
-        console.error('Error during state cleanup:', cleanupError);
-      }
-      
       return {
         success: false,
-        error: error?.message || 'An error occurred while logging in.'
+        error: 'An error occurred while logging in.'
       };
     }
   };

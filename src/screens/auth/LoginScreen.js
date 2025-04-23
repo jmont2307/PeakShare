@@ -20,7 +20,6 @@ const LoginScreen = ({ navigation }) => {
   const [hidePassword, setHidePassword] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [componentError, setComponentError] = useState(null);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -31,19 +30,13 @@ const LoginScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
-      console.log('Attempting login with:', email, password);
       const result = await login(email, password);
-      console.log('Login result:', result);
       
       if (!result.success) {
         setErrorMessage(result.error);
         setSnackbarVisible(true);
-      } else {
-        console.log('Login successful!');
       }
     } catch (error) {
-      console.error('Login error caught:', error);
-      setComponentError(error);
       setErrorMessage('An unexpected error occurred. Please try again.');
       setSnackbarVisible(true);
     } finally {
@@ -113,14 +106,6 @@ const LoginScreen = ({ navigation }) => {
           </View>
         </View>
       </ScrollView>
-
-      {componentError && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorTitle}>Debug Error:</Text>
-          <Text style={styles.errorText}>{componentError.toString()}</Text>
-          <Text style={styles.errorText}>{componentError.stack}</Text>
-        </View>
-      )}
 
       <Snackbar
         visible={snackbarVisible}
@@ -195,28 +180,6 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     color: '#0066CC',
     fontWeight: 'bold',
-  },
-  errorContainer: {
-    position: 'absolute',
-    bottom: 100,
-    left: 10,
-    right: 10,
-    backgroundColor: 'rgba(255, 220, 220, 0.9)',
-    padding: 10,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: '#B00020',
-    maxHeight: 200,
-    overflow: 'scroll',
-  },
-  errorTitle: {
-    fontWeight: 'bold',
-    color: '#B00020',
-    marginBottom: 5,
-  },
-  errorText: {
-    fontSize: 12,
-    color: '#333',
   },
 });
 
