@@ -68,14 +68,20 @@ export const AuthProvider = ({ children }) => {
 
   // Handle user state changes - with safer initialization
   useEffect(() => {
-    // Check for saved login in development mode
-    const checkForSavedLogin = async () => {
+    // Wrap in a try-catch for safety
+    const initializeAuth = async () => {
+      console.log('Initializing authentication state...');
+      
       try {
+        // Explicitly set loading to true at start
+        setLoading(true);
+        
         // For development, you might want to auto-login
         // This is just for testing - remove for production
         const autoLogin = false;  // Set to true to auto-login in dev
 
         if (autoLogin) {
+          console.log('Auto-login enabled, using mock account');
           // Use the first mock account
           const mockAccount = savedAccounts[0];
           if (mockAccount) {
@@ -89,39 +95,50 @@ export const AuthProvider = ({ children }) => {
             dispatch(setUserData(mockAccount));
           }
         } else {
-          // Force login screen
+          console.log('Auto-login disabled, directing to login screen');
+          // Force login screen - this is the normal flow
           setUser(null);
           setLocalUserData(null);
           dispatch(clearUserData());
         }
       } catch (error) {
-        console.error('Error in auth initialization:', error);
+        console.error('Critical error in auth initialization:', error);
         // Make sure to clear auth state on error
         setUser(null);
         setLocalUserData(null);
         dispatch(clearUserData());
       } finally {
         // Always set loading to false when done
+        console.log('Auth initialization complete, setting loading to false');
         setLoading(false);
       }
     };
     
-    checkForSavedLogin();
-    return () => {}; 
+    // Run the initialization
+    initializeAuth();
+    
+    // Cleanup - nothing to do here
+    return () => {
+      console.log('Auth context unmounting');
+    };
   }, [dispatch, savedAccounts]);
 
   const login = async (email, password) => {
+    console.log('Login function called with:', email, password ? '********' : 'empty');
+    
     try {
       // For testing: allow any email/password
       if (email && password) {
-        // First create the user object
+        console.log('Creating mock user data...');
+        
+        // First create the basic user object (similar to Firebase user)
         const mockUser = {
           uid: 'test-user-123',
           email: email,
           displayName: 'Test User',
         };
         
-        // Create mock user data with placeholder image
+        // Create full mock user data with placeholder image
         const mockUserData = {
           uid: 'test-user-123',
           email: email,
@@ -140,13 +157,29 @@ export const AuthProvider = ({ children }) => {
           }
         };
         
-        // Update the state and Redux
-        dispatch(setUserData(mockUserData));
-        setLocalUserData(mockUserData);
-        setUser(mockUser);
-        
-        return { success: true };
+        // IMPORTANT: Update states in the right order to prevent race conditions
+        try {
+          console.log('Setting user data in Redux store...');
+          
+          // 1. First update Redux state
+          dispatch(setUserData(mockUserData));
+          
+          // 2. Then update local component state
+          console.log('Setting local user data...');
+          setLocalUserData(mockUserData);
+          
+          // 3. Finally set the authenticated user (triggers navigation)
+          console.log('Setting authenticated user...');
+          setUser(mockUser);
+          
+          console.log('Login successful!');
+          return { success: true };
+        } catch (stateError) {
+          console.error('Error updating state during login:', stateError);
+          throw new Error('Failed to update application state: ' + stateError.message);
+        }
       } else {
+        console.log('Login failed: Missing email or password');
         return {
           success: false,
           error: 'Please enter both email and password.'
@@ -154,6 +187,15 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
+      // Ensure we clean up any partially set state
+      try {
+        setUser(null);
+        setLocalUserData(null); 
+        dispatch(clearUserData());
+      } catch (cleanupError) {
+        console.error('Error during state cleanup:', cleanupError);
+      }
+      
       return {
         success: false,
         error: error?.message || 'An error occurred while logging in.'

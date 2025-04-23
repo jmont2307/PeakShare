@@ -36,7 +36,16 @@ const ThemedApp = () => {
         backgroundColor={theme.colors.background}
       />
       <PaperProvider theme={theme}>
-        <NavigationContainer theme={theme} fallback={<LoadingSpinner />}>
+        <NavigationContainer 
+          theme={theme} 
+          fallback={<LoadingSpinner />}
+          onReady={() => {
+            console.log('Navigation is ready');
+          }}
+          onStateChange={(state) => {
+            console.log('Navigation state changed:', state ? 'New state available' : 'No state');
+          }}
+        >
           <AppNavigator />
         </NavigationContainer>
       </PaperProvider>
