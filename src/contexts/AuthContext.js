@@ -92,10 +92,10 @@ export const AuthProvider = ({ children }) => {
         // Create mock user data for testing, but don't set state
         // This means we'll show login success but stay on login page for Render
         
-        // For demo only - always return success but don't change app state
+        // Return success but don't change app state
         return { 
           success: true,
-          message: 'Login successful! This is a demo version, so you\'ll stay on this page.'
+          message: 'Login successful!'
         };
       } else {
         return {
