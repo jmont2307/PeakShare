@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 
 import { AuthContext } from '../contexts/AuthContext';
 import { theme } from '../theme';
@@ -81,8 +82,17 @@ function MainTabs() {
 export default function AppNavigator() {
   const { user, loading } = useContext(AuthContext);
   
+  // Enhanced loading screen
   if (loading) {
-    return null; // Or a loading screen
+    return (
+      <View style={styles.loadingContainer}>
+        <View style={styles.loadingContent}>
+          <Text style={styles.loadingTitle}>PeakShare</Text>
+          <ActivityIndicator size="large" color="#0066CC" style={styles.spinner} />
+          <Text style={styles.loadingText}>Preparing your mountain adventure...</Text>
+        </View>
+      </View>
+    );
   }
 
   return (
@@ -184,3 +194,31 @@ export default function AppNavigator() {
     </Stack.Navigator>
   );
 }
+
+// Styles for the loading screen
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  loadingContent: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#0066CC',
+    marginBottom: 20,
+  },
+  spinner: {
+    marginVertical: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666666',
+    textAlign: 'center',
+  }
+});

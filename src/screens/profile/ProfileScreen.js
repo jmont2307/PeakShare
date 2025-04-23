@@ -23,6 +23,7 @@ import { fetchUserProfile, updateUserProfile } from '../../redux/slices/userSlic
 import { fetchUserPosts } from '../../redux/slices/postsSlice';
 import { AuthContext } from '../../contexts/AuthContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { theme } from '../../theme';
 
 const { width } = Dimensions.get('window');
 const POST_WIDTH = width / 3 - 4;

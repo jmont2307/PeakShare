@@ -1,46 +1,33 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { Provider as ReduxProvider } from 'react-redux';
-import { StatusBar, View, Platform, StyleSheet } from 'react-native';
+import { StatusBar, View, StyleSheet, Text, ActivityIndicator } from 'react-native';
 
 import { store } from './redux/store';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider, ThemeContext } from './contexts/ThemeContext';
 import AppNavigator from './navigation/AppNavigator';
 
-// Import web polyfills
+// Import polyfills for better web experience
 import './web-polyfills';
+
+// Simple loading spinner for any loading state
+const LoadingSpinner = () => (
+  <View style={styles.loadingContainer}>
+    <ActivityIndicator size="large" color="#0066CC" />
+    <Text style={styles.loadingText}>Loading...</Text>
+  </View>
+);
 
 // Component that uses the theme context
 const ThemedApp = () => {
-  const { theme, isDarkMode } = useContext(ThemeContext);
+  const { theme, isDarkMode, isLoading } = useContext(ThemeContext);
   
-  // Apply web-specific touch event fixes
-  useEffect(() => {
-    if (Platform.OS === 'web') {
-      // Make all touchable elements actually respond to touches
-      const applyTouchStyles = () => {
-        if (typeof document !== 'undefined') {
-          const touchableElements = document.querySelectorAll(
-            'button, a, [role="button"], .touchable, [class*="touchable"], [class*="button"], [class*="pressable"]'
-          );
-          
-          touchableElements.forEach(el => {
-            el.style.touchAction = 'manipulation';
-            el.style.cursor = 'pointer';
-            el.style.webkitTapHighlightColor = 'transparent';
-          });
-        }
-      };
-      
-      // Apply immediately and also set interval to catch dynamically added elements
-      applyTouchStyles();
-      const intervalId = setInterval(applyTouchStyles, 1000);
-      
-      return () => clearInterval(intervalId);
-    }
-  }, []);
+  // Show loading indicator while theme is loading
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
   
   return (
     <View style={styles.container}>
@@ -49,7 +36,7 @@ const ThemedApp = () => {
         backgroundColor={theme.colors.background}
       />
       <PaperProvider theme={theme}>
-        <NavigationContainer theme={theme}>
+        <NavigationContainer theme={theme} fallback={<LoadingSpinner />}>
           <AppNavigator />
         </NavigationContainer>
       </PaperProvider>
@@ -57,28 +44,85 @@ const ThemedApp = () => {
   );
 };
 
+// Error boundary implementation to catch render errors
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Error in component:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorTitle}>Something went wrong</Text>
+          <Text style={styles.errorMessage}>
+            The app encountered an error. Please try refreshing the page.
+          </Text>
+        </View>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 // Main SimpleApp component that sets up providers and navigation
 const SimpleApp = () => {
   return (
-    <ReduxProvider store={store}>
-      <AuthProvider>
-        <ThemeProvider>
-          <ThemedApp />
-        </ThemeProvider>
-      </AuthProvider>
-    </ReduxProvider>
+    <ErrorBoundary>
+      <ReduxProvider store={store}>
+        <AuthProvider>
+          <ThemeProvider>
+            <ThemedApp />
+          </ThemeProvider>
+        </AuthProvider>
+      </ReduxProvider>
+    </ErrorBoundary>
   );
 };
 
-// Define styles for the app container
+// Enhanced styles
 const styles = StyleSheet.create({
   container: {
+    flex: 1
+  },
+  loadingContainer: {
     flex: 1,
-    // Ensure the container takes full screen on web
-    ...(Platform.OS === 'web' ? {
-      height: '100%',
-      width: '100%',
-    } : {})
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF'
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#0066CC'
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#FFFFFF'
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#B00020',
+    marginBottom: 10
+  },
+  errorMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#333333'
   }
 });
 

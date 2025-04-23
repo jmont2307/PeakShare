@@ -16,6 +16,16 @@ if (!fs.existsSync(distDir)) {
 }
 
 const server = http.createServer((req, res) => {
+  // Add headers for better click handling
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  // Handle OPTIONS requests for CORS
+  if (req.method === 'OPTIONS') {
+    res.writeHead(200);
+    return res.end();
+  }
   // Health check endpoints
   if (req.url === '/health' || req.url === '/api/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });

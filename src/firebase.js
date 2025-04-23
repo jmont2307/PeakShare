@@ -24,12 +24,13 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 // Development mode check
-const isLocalhost = 
-  window.location.hostname === 'localhost' || 
-  window.location.hostname === '127.0.0.1';
+const isLocalhost = typeof window !== 'undefined' && (
+  window.location?.hostname === 'localhost' || 
+  window.location?.hostname === '127.0.0.1'
+);
 
 // Connect to emulators in development mode
-if (process.env.NODE_ENV === 'development' || isLocalhost) {
+if ((process.env.NODE_ENV === 'development' || isLocalhost) && typeof window !== 'undefined') {
   console.log('Using Firebase emulators for local development');
   
   // Connect to Auth emulator
@@ -61,11 +62,17 @@ if (process.env.NODE_ENV === 'development' || isLocalhost) {
 
 // Initialize Analytics conditionally (may not work in React Native without additional setup)
 let analytics = null;
-(async () => {
-  if (await isSupported() && !isLocalhost) {
-    analytics = getAnalytics(app);
-  }
-})();
+if (typeof window !== 'undefined') {
+  (async () => {
+    try {
+      if (await isSupported() && !isLocalhost) {
+        analytics = getAnalytics(app);
+      }
+    } catch (error) {
+      console.log('Analytics not supported in this environment:', error);
+    }
+  })();
+}
 
 export { auth, db, storage, analytics };
 export default app;

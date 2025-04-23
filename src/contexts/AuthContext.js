@@ -33,60 +33,117 @@ export const AuthProvider = ({ children }) => {
       email: 'test@example.com',
       username: 'testuser',
       displayName: 'Test User',
-      profileImageUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=60',
+      profileImageUrl: 'https://via.placeholder.com/200/e0f2ff/0066cc?text=TU',
+      bio: 'Snow enthusiast',
+      location: 'Denver, CO',
+      postCount: 8,
+      followerCount: 120,
+      followingCount: 45,
+      skiStats: {
+        resortCount: 5,
+        totalDistance: 480,
+        preferredTerrain: 'Powder'
+      }
     },
     {
       uid: 'test-user-456',
       email: 'jane@example.com',
       username: 'janedoe',
       displayName: 'Jane Doe',
-      profileImageUrl: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=60',
+      profileImageUrl: 'https://via.placeholder.com/200/e0f2ff/0066cc?text=JD',
+      bio: 'Backcountry explorer',
+      location: 'Salt Lake City, UT',
+      postCount: 12,
+      followerCount: 253,
+      followingCount: 187,
+      skiStats: {
+        resortCount: 7,
+        totalDistance: 620,
+        preferredTerrain: 'Backcountry'
+      }
     }
   ]);
   
   const dispatch = useDispatch();
 
-  // Handle user state changes
+  // Handle user state changes - with safer initialization
   useEffect(() => {
-    // Always set user to null to force login screen initially
-    setUser(null);
-    setLocalUserData(null);
-    dispatch(clearUserData());
-    setLoading(false);
+    // Check for saved login in development mode
+    const checkForSavedLogin = async () => {
+      try {
+        // For development, you might want to auto-login
+        // This is just for testing - remove for production
+        const autoLogin = false;  // Set to true to auto-login in dev
+
+        if (autoLogin) {
+          // Use the first mock account
+          const mockAccount = savedAccounts[0];
+          if (mockAccount) {
+            setUser({
+              uid: mockAccount.uid,
+              email: mockAccount.email,
+              displayName: mockAccount.displayName,
+            });
+            
+            setLocalUserData(mockAccount);
+            dispatch(setUserData(mockAccount));
+          }
+        } else {
+          // Force login screen
+          setUser(null);
+          setLocalUserData(null);
+          dispatch(clearUserData());
+        }
+      } catch (error) {
+        console.error('Error in auth initialization:', error);
+        // Make sure to clear auth state on error
+        setUser(null);
+        setLocalUserData(null);
+        dispatch(clearUserData());
+      } finally {
+        // Always set loading to false when done
+        setLoading(false);
+      }
+    };
     
-    // In a real app, this would check Firebase auth state
+    checkForSavedLogin();
     return () => {}; 
-  }, [dispatch]);
+  }, [dispatch, savedAccounts]);
 
   const login = async (email, password) => {
     try {
       // For testing: allow any email/password
       if (email && password) {
-        // Simulate successful login
+        // First create the user object
         const mockUser = {
           uid: 'test-user-123',
           email: email,
           displayName: 'Test User',
         };
         
-        setUser(mockUser);
-        
-        // Create mock user data
+        // Create mock user data with placeholder image
         const mockUserData = {
           uid: 'test-user-123',
           email: email,
           username: 'testuser',
           displayName: 'Test User',
-          profileImageUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=60',
+          profileImageUrl: 'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
           bio: 'Test user account',
           location: 'Test Location',
           postCount: 5,
           followerCount: 120,
           followingCount: 45,
+          skiStats: {
+            resortCount: 3,
+            totalDistance: 250,
+            preferredTerrain: 'Powder'
+          }
         };
         
-        setLocalUserData(mockUserData);
+        // Update the state and Redux
         dispatch(setUserData(mockUserData));
+        setLocalUserData(mockUserData);
+        setUser(mockUser);
         
         return { success: true };
       } else {
@@ -96,9 +153,10 @@ export const AuthProvider = ({ children }) => {
         };
       }
     } catch (error) {
+      console.error('Login error:', error);
       return {
         success: false,
-        error: 'An error occurred while logging in.'
+        error: error?.message || 'An error occurred while logging in.'
       };
     }
   };
@@ -164,13 +222,26 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      // Update user's FCM token is removed from this version
-      await signOut(auth);
+      // For mock auth, just clear local state
+      setUser(null);
+      setLocalUserData(null);
+      dispatch(clearUserData());
+      
+      // Only attempt to sign out if using real Firebase auth
+      try {
+        if (auth) {
+          await signOut(auth);
+        }
+      } catch (e) {
+        console.log('Error during sign out, but continuing:', e);
+      }
+      
       return { success: true };
     } catch (error) {
+      console.error('Logout error:', error);
       return {
         success: false,
-        error: error.message
+        error: error.message || 'Error logging out'
       };
     }
   };
@@ -198,40 +269,48 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Add switchAccount function
+  // Add switchAccount function with improved error handling
   const switchAccount = (accountId) => {
     try {
       const selectedAccount = savedAccounts.find(account => account.uid === accountId);
       
       if (selectedAccount) {
-        // Set user and userData
+        // Set user data first
         const mockUser = {
           uid: selectedAccount.uid,
           email: selectedAccount.email,
           displayName: selectedAccount.displayName,
         };
         
-        setUser(mockUser);
-        
-        // Create mock user data
+        // Use the full account data which already has proper fields
         const mockUserData = {
           ...selectedAccount,
-          bio: `${selectedAccount.displayName}'s profile`,
-          location: 'Mountain View, CA',
-          postCount: Math.floor(Math.random() * 20) + 5,
-          followerCount: Math.floor(Math.random() * 500) + 100,
-          followingCount: Math.floor(Math.random() * 200) + 40,
+          // Ensure we don't have missing fields
+          bio: selectedAccount.bio || `${selectedAccount.displayName}'s profile`,
+          location: selectedAccount.location || 'Mountain View, CA',
+          postCount: selectedAccount.postCount || Math.floor(Math.random() * 20) + 5,
+          followerCount: selectedAccount.followerCount || Math.floor(Math.random() * 500) + 100,
+          followingCount: selectedAccount.followingCount || Math.floor(Math.random() * 200) + 40,
+          skiStats: selectedAccount.skiStats || {
+            resortCount: Math.floor(Math.random() * 10) + 1,
+            totalDistance: Math.floor(Math.random() * 500) + 100,
+            preferredTerrain: 'All'
+          }
         };
         
-        setLocalUserData(mockUserData);
+        // Update Redux first, then local state
         dispatch(setUserData(mockUserData));
+        setLocalUserData(mockUserData);
+        setUser(mockUser);
         
         return { success: true };
       } else {
+        console.warn('Account not found:', accountId);
         return { success: false, error: 'Account not found' };
       }
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Switch account error:', error);
+      return { success: false, error: error?.message || 'Error switching accounts' };
     }
   };
 
