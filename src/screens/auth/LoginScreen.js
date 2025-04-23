@@ -18,12 +18,12 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('password');    // Pre-fill for easier testing
   const [loading, setLoading] = useState(false);
   const [hidePassword, setHidePassword] = useState(true);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
   const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
-      setErrorMessage('Please enter both email and password');
+      setStatusMessage('Please enter both email and password');
       setSnackbarVisible(true);
       return;
     }
@@ -32,12 +32,17 @@ const LoginScreen = ({ navigation }) => {
     try {
       const result = await login(email, password);
       
-      if (!result.success) {
-        setErrorMessage(result.error);
+      if (result.success) {
+        // Show success message
+        setStatusMessage(result.message || 'Login successful!');
+        setSnackbarVisible(true);
+      } else {
+        // Show error message
+        setStatusMessage(result.error);
         setSnackbarVisible(true);
       }
     } catch (error) {
-      setErrorMessage('An unexpected error occurred. Please try again.');
+      setStatusMessage('An unexpected error occurred. Please try again.');
       setSnackbarVisible(true);
     } finally {
       setLoading(false);
@@ -116,7 +121,7 @@ const LoginScreen = ({ navigation }) => {
           onPress: () => setSnackbarVisible(false),
         }}
       >
-        {errorMessage}
+        {statusMessage}
       </Snackbar>
     </KeyboardAvoidingView>
   );
@@ -162,6 +167,7 @@ const styles = StyleSheet.create({
   loginButton: {
     marginTop: 8,
     paddingVertical: 6,
+    backgroundColor: '#0066CC',
   },
   forgotPassword: {
     textAlign: 'center',

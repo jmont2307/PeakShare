@@ -89,38 +89,14 @@ export const AuthProvider = ({ children }) => {
     try {
       // For testing: allow any email/password combination
       if (email && password) {
-        // Create simple mock user
-        const mockUser = {
-          uid: 'test-user-123',
-          email: email,
-          displayName: 'Test User',
+        // Create mock user data for testing, but don't set state
+        // This means we'll show login success but stay on login page for Render
+        
+        // For demo only - always return success but don't change app state
+        return { 
+          success: true,
+          message: 'Login successful! This is a demo version, so you\'ll stay on this page.'
         };
-        
-        // Create mock user data
-        const mockUserData = {
-          uid: 'test-user-123',
-          email: email,
-          username: 'testuser',
-          displayName: 'Test User',
-          profileImageUrl: 'https://via.placeholder.com/200/e0f2ff/0066cc?text=PS',
-          bio: 'Test user account',
-          location: 'Test Location',
-          postCount: 5,
-          followerCount: 120,
-          followingCount: 45,
-          skiStats: {
-            resortCount: 3,
-            totalDistance: 250,
-            preferredTerrain: 'Powder'
-          }
-        };
-        
-        // Update states in a simple way
-        dispatch(setUserData(mockUserData));
-        setLocalUserData(mockUserData);
-        setUser(mockUser);
-        
-        return { success: true };
       } else {
         return {
           success: false,
